@@ -1,0 +1,7 @@
+.DS_Store
+xcuserdata/
+*.xcuserstate
+DerivedData/
+CLAUDE.md
+.claude/
+Secrets.xcconfig
