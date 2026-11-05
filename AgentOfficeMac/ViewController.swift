@@ -18,6 +18,7 @@ class ViewController: NSViewController {
     private static let activityListWidth: CGFloat = 270
 
     private let folderAccess = EventFolderAccess()
+    private let cloudPublisher = CloudPublisher()
     private var office = SessionStore.Office()
     private var snapshots: [AgentSnapshot] = []
     private var floors: [FloorSummary] = []
@@ -32,6 +33,7 @@ class ViewController: NSViewController {
 
     private let folderLabel = NSTextField(labelWithString: "")
     private let chooseFolderButton = NSButton(title: "기록 폴더 선택…", target: nil, action: nil)
+    private let syncLabel = NSTextField(labelWithString: "")
     private let floorTable = NSTableView()
     private let officeView = SKView()
     private let officeScene = OfficeScene(layout: .standard)
@@ -92,6 +94,25 @@ class ViewController: NSViewController {
         chooseFolderButton.target = self
         chooseFolderButton.action = #selector(chooseFolder)
         chooseFolderButton.bezelStyle = .push
+
+        syncLabel.textColor = .secondaryLabelColor
+        syncLabel.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        cloudPublisher.onStateChange = { [weak self] state in
+            self?.updateSyncLabel(state)
+        }
+    }
+
+    private func updateSyncLabel(_ state: CloudPublisher.State) {
+        switch state {
+        case .starting:
+            syncLabel.stringValue = ""
+        case .syncing:
+            syncLabel.stringValue = "iPhone과 동기화 중"
+        case .accountUnavailable:
+            syncLabel.stringValue = "iCloud에 로그인하면 iPhone에서도 볼 수 있어요"
+        case .failed:
+            syncLabel.stringValue = "iCloud 동기화 실패 · 잠시 후 다시 시도해요"
+        }
     }
 
     private func makeFloorPanel() -> NSView {
@@ -172,7 +193,9 @@ class ViewController: NSViewController {
     }
 
     private func layOut(floorPanel: NSView, activityPanel: NSView, cardScroll: NSScrollView) {
-        let header = NSStackView(views: [folderLabel, chooseFolderButton])
+        let spacer = NSView()
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        let header = NSStackView(views: [folderLabel, chooseFolderButton, spacer, syncLabel])
         header.orientation = .horizontal
         header.spacing = 12
 
@@ -277,6 +300,7 @@ class ViewController: NSViewController {
         snapshots = office.sessions.flatMap { $0.snapshots(at: now) }
         floors = FloorSummary.floors(from: snapshots)
         updateFloor(now: now)
+        cloudPublisher.update(snapshots, now: now)
     }
 
     /// Shows the chosen floor, or every floor together when nothing is chosen.
