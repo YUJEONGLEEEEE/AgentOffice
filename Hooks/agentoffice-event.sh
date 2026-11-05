@@ -21,12 +21,15 @@ command -v jq >/dev/null 2>&1 || exit 0
 input="$(cat)" || exit 0
 timestamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-line="$(printf '%s' "$input" | jq -c --arg ts "$timestamp" '
+# Use the folder the session started in, so moving into a subfolder does not change the project.
+project_dir="${CLAUDE_PROJECT_DIR:-}"
+
+line="$(printf '%s' "$input" | jq -c --arg ts "$timestamp" --arg projectDir "$project_dir" '
   {
     ts: $ts,
     event: .hook_event_name,
     session: .session_id,
-    project: ((.cwd // "") | split("/") | last),
+    project: ((($projectDir | select(. != "")) // .cwd // "") | rtrimstr("/") | split("/") | last),
     tool: .tool_name,
     agentId: .agent_id,
     agentType: .agent_type,
