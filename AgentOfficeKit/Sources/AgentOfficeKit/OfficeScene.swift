@@ -2,7 +2,7 @@ import SpriteKit
 
 /// A top-down pixel-art office floor drawn with SpriteKit.
 ///
-/// The scene only draws the static office for now: floors, walls, doors, furniture and room signs.
+/// The scene draws the office (floors, walls, doors, furniture and room signs) and the agents walking in it.
 /// Positions come from `OfficeLayout`, so the same scene works on macOS and iOS.
 public final class OfficeScene: SKScene {
 
@@ -12,6 +12,8 @@ public final class OfficeScene: SKScene {
     private var agentNodes: [String: AgentNode] = [:]
     private var pendingSnapshots: [AgentSnapshot]?
     private var hasShownAgents = false
+    /// Frames of the furniture drawn so far, so tests can check agents walk around all of it.
+    private(set) var furnitureFrames: [CGRect] = []
 
     public init(layout: OfficeLayout = .standard) {
         self.layout = layout
@@ -28,9 +30,7 @@ public final class OfficeScene: SKScene {
 
     public override func didMove(to view: SKView) {
         super.didMove(to: view)
-        guard !isBuilt else { return }
-        isBuilt = true
-        buildOffice()
+        buildIfNeeded()
         if let pendingSnapshots {
             self.pendingSnapshots = nil
             show(agents: pendingSnapshots)
@@ -92,7 +92,9 @@ public final class OfficeScene: SKScene {
 
     // MARK: - Building
 
-    private func buildOffice() {
+    func buildIfNeeded() {
+        guard !isBuilt else { return }
+        isBuilt = true
         drawHallway()
         for room in Room.allCases {
             drawRoom(room)
@@ -199,18 +201,19 @@ public final class OfficeScene: SKScene {
     // MARK: - Furniture
 
     private func furnishHallway() {
-        // Elevator
-        box(CGRect(x: 8, y: 258, width: 72, height: 50), OfficePalette.steel, border: OfficePalette.steelDark)
-        box(CGRect(x: 42, y: 261, width: 4, height: 44), OfficePalette.steelDark, z: Layer.detail)
+        // Elevator: agents step out of it, so it is drawn as floor-level, not furniture.
+        box(CGRect(x: 8, y: 258, width: 72, height: 50), OfficePalette.steel, border: OfficePalette.steelDark, z: Layer.door)
+        box(CGRect(x: 42, y: 261, width: 4, height: 44), OfficePalette.steelDark, z: Layer.door + 0.1)
         // Card reader: the hook that records every visit
-        box(CGRect(x: 88, y: 270, width: 12, height: 20), OfficePalette.wall, border: OfficePalette.wallShadow)
-        blink(box(CGRect(x: 92, y: 274, width: 4, height: 4), OfficePalette.green, z: Layer.detail), minimum: 0.4)
+        box(CGRect(x: 88, y: 266, width: 12, height: 18), OfficePalette.wall, border: OfficePalette.wallShadow)
+        blink(box(CGRect(x: 92, y: 270, width: 4, height: 4), OfficePalette.green, z: Layer.detail), minimum: 0.4)
 
-        plant(at: CGPoint(x: 300, y: 262))
-        plant(at: CGPoint(x: 1110, y: 262))
+        // Small decorations close to the wall leave a walking lane along the hallway.
+        plant(at: CGPoint(x: 300, y: 258), leafHeight: 18)
+        plant(at: CGPoint(x: 1110, y: 258), leafHeight: 18)
         // Water cooler
-        box(CGRect(x: 690, y: 260, width: 20, height: 42), SKColor(hex: 0xE8EEF2), border: OfficePalette.steel)
-        box(CGRect(x: 693, y: 263, width: 14, height: 12), OfficePalette.sky, z: Layer.detail)
+        box(CGRect(x: 690, y: 256, width: 20, height: 34), SKColor(hex: 0xE8EEF2), border: OfficePalette.steel)
+        box(CGRect(x: 693, y: 259, width: 14, height: 10), OfficePalette.sky, z: Layer.detail)
     }
 
     private func furnishMeetingRoom() {
@@ -278,6 +281,7 @@ public final class OfficeScene: SKScene {
         globe.position = layout.scenePoint(CGPoint(x: o.x + 370, y: o.y + 104))
         globe.zPosition = Layer.furniture
         addChild(globe)
+        furnitureFrames.append(CGRect(x: o.x + 350, y: o.y + 84, width: 40, height: 40))
         box(rect(o, 358, 92, 14, 12), land, z: Layer.detail)
         box(rect(o, 366, 124, 8, 22), OfficePalette.woodDark)
         // Search desks
@@ -329,8 +333,9 @@ public final class OfficeScene: SKScene {
         box(rect(o, 108, 8, 58, 18), SKColor(hex: 0xE8EEF2), border: OfficePalette.steel, borderWidth: 2)
         // Racks with blinking lights
         let lightColors: [SKColor] = [OfficePalette.green, OfficePalette.yellow, OfficePalette.sky, SKColor(hex: 0xE8684A)]
-        for (rackIndex, x) in [18, 70, 122].enumerated() {
-            let rack = rect(o, CGFloat(x), 70, 40, 130)
+        // Two racks on the left leave an aisle on the right to walk in.
+        for (rackIndex, x) in [14, 64].enumerated() {
+            let rack = rect(o, CGFloat(x), 70, 44, 130)
             box(rack, SKColor(hex: 0x23272F), border: OfficePalette.screenDark, borderWidth: 3)
             for row in 0..<10 {
                 for column in 0..<2 {
@@ -365,6 +370,7 @@ public final class OfficeScene: SKScene {
         table.position = layout.scenePoint(CGPoint(x: o.x + 66, y: o.y + 176))
         table.zPosition = Layer.furniture
         addChild(table)
+        furnitureFrames.append(CGRect(x: o.x + 40, y: o.y + 150, width: 52, height: 52))
         box(rect(o, 72, 150, 10, 10), OfficePalette.paper, border: OfficePalette.woodDark, borderWidth: 2, z: Layer.detail)
         steam(at: CGPoint(x: o.x + 77, y: o.y + 146))
         // Sofa
@@ -388,9 +394,9 @@ public final class OfficeScene: SKScene {
         box(frame, screen, border: OfficePalette.screenDark, borderWidth: 2, z: Layer.detail)
     }
 
-    private func plant(at topLeft: CGPoint) {
-        box(CGRect(x: topLeft.x + 2, y: topLeft.y, width: 20, height: 30), OfficePalette.leaf, border: OfficePalette.leafDark, borderWidth: 2)
-        box(CGRect(x: topLeft.x + 5, y: topLeft.y + 30, width: 14, height: 12), OfficePalette.pot)
+    private func plant(at topLeft: CGPoint, leafHeight: CGFloat = 30) {
+        box(CGRect(x: topLeft.x + 2, y: topLeft.y, width: 20, height: leafHeight), OfficePalette.leaf, border: OfficePalette.leafDark, borderWidth: 2)
+        box(CGRect(x: topLeft.x + 5, y: topLeft.y + leafHeight, width: 14, height: 12), OfficePalette.pot)
     }
 
     private func steam(at bottom: CGPoint) {
@@ -429,6 +435,9 @@ public final class OfficeScene: SKScene {
         borderWidth: CGFloat = 2,
         z: CGFloat = Layer.furniture
     ) -> SKSpriteNode {
+        if z == Layer.furniture {
+            furnitureFrames.append(frame)
+        }
         if let border {
             let outer = SKSpriteNode(color: border, size: frame.size)
             place(outer, in: frame, z: z)

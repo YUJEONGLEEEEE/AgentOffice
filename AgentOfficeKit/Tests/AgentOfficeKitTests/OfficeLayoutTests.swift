@@ -34,35 +34,56 @@ struct OfficeLayoutTests {
         }
     }
 
-    @Test func spreadSpotsStayInsideTheRoom() {
+    @Test func spreadSpotsAreOnFreeFloorInsideTheRoom() {
         for room in Room.allCases {
             for index in 0..<8 {
-                #expect(layout.interior(for: room).contains(layout.spot(for: room, index: index)), "\(room) #\(index)")
+                let spot = layout.spot(for: room, index: index)
+                #expect(layout.interior(for: room).contains(spot), "\(room) #\(index)")
+                #expect(layout.isWalkable(spot), "\(room) #\(index) is on furniture or too close to a wall")
             }
         }
     }
 
-    @Test func eachDoorIsAGapInTheWall() {
-        for room in Room.allCases {
-            let x = layout.doorX(for: room)
-            #expect(layout.doors.contains { $0.minX < x && x < $0.maxX }, "\(room) has no door at x \(x)")
+    @Test func elevatorSpotIsWalkable() {
+        #expect(layout.isWalkable(layout.elevatorSpot))
+    }
+
+    @Test func furnitureIsNotWalkable() {
+        for piece in layout.furniture {
+            #expect(!layout.isWalkable(CGPoint(x: piece.midX, y: piece.midY)), "\(piece)")
         }
     }
 
-    /// Every step stays inside one room or the hallway, or passes straight through a door.
+    /// Everything the scene draws as furniture must be listed in the layout, or agents would walk over it.
+    @Test @MainActor func layoutListsAllDrawnFurniture() {
+        let scene = OfficeScene(layout: layout)
+        scene.buildIfNeeded()
+
+        #expect(!scene.furnitureFrames.isEmpty)
+        for frame in scene.furnitureFrames {
+            #expect(layout.furniture.contains { $0.contains(frame) }, "\(frame) is drawn but not in the layout")
+        }
+    }
+
+    /// Every step of every route stays on free floor: no walls, no furniture.
     @Test(arguments: [Room?.none] + Room.allCases.map(Optional.some))
-    func routesNeverCrossWalls(from start: Room?) {
-        let hallway = layout.hallway.insetBy(dx: 0, dy: -1)
+    func routesAvoidWallsAndFurniture(from start: Room?) {
         for end in [Room?.none] + Room.allCases.map(Optional.some) {
-            let first = start.map { layout.spot(for: $0) } ?? layout.elevatorSpot
-            let points = [first] + layout.path(from: start, to: end)
-            for (from, to) in zip(points, points.dropFirst()) {
-                let areas = Room.allCases.map { layout.interior(for: $0) } + [hallway]
-                let sameArea = areas.contains { $0.contains(from) && $0.contains(to) }
-                let throughDoor = from.x == to.x && layout.doors.contains { $0.minX < from.x && from.x < $0.maxX }
-                #expect(sameArea || throughDoor, "\(String(describing: start)) → \(String(describing: end)): \(from) → \(to)")
+            for (startIndex, endIndex) in [(0, 0), (1, 2), (4, 3)] {
+                let first = start.map { layout.spot(for: $0, index: startIndex) } ?? layout.elevatorSpot
+                let points = [first] + layout.path(from: start, startIndex: startIndex, to: end, endIndex: endIndex)
+                let label = "\(String(describing: start)) → \(String(describing: end))"
+                for (from, to) in zip(points, points.dropFirst()) {
+                    let steps = max(1, Int(hypot(to.x - from.x, to.y - from.y)))
+                    let crossesBlockedFloor = (0...steps).contains { step in
+                        let t = CGFloat(step) / CGFloat(steps)
+                        return !layout.isWalkable(CGPoint(x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t))
+                    }
+                    #expect(!crossesBlockedFloor, "\(label): \(from) → \(to)")
+                }
+                let target = end.map { layout.spot(for: $0, index: endIndex) } ?? layout.elevatorSpot
+                #expect(points.last == target, "\(label) does not reach its spot")
             }
-            #expect(points.last == (end.map { layout.spot(for: $0) } ?? layout.elevatorSpot))
         }
     }
 
