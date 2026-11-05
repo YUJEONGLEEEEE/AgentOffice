@@ -34,6 +34,38 @@ struct OfficeLayoutTests {
         }
     }
 
+    @Test func spreadSpotsStayInsideTheRoom() {
+        for room in Room.allCases {
+            for index in 0..<8 {
+                #expect(layout.interior(for: room).contains(layout.spot(for: room, index: index)), "\(room) #\(index)")
+            }
+        }
+    }
+
+    @Test func eachDoorIsAGapInTheWall() {
+        for room in Room.allCases {
+            let x = layout.doorX(for: room)
+            #expect(layout.doors.contains { $0.minX < x && x < $0.maxX }, "\(room) has no door at x \(x)")
+        }
+    }
+
+    /// Every step stays inside one room or the hallway, or passes straight through a door.
+    @Test(arguments: [Room?.none] + Room.allCases.map(Optional.some))
+    func routesNeverCrossWalls(from start: Room?) {
+        let hallway = layout.hallway.insetBy(dx: 0, dy: -1)
+        for end in [Room?.none] + Room.allCases.map(Optional.some) {
+            let first = start.map { layout.spot(for: $0) } ?? layout.elevatorSpot
+            let points = [first] + layout.path(from: start, to: end)
+            for (from, to) in zip(points, points.dropFirst()) {
+                let areas = Room.allCases.map { layout.interior(for: $0) } + [hallway]
+                let sameArea = areas.contains { $0.contains(from) && $0.contains(to) }
+                let throughDoor = from.x == to.x && layout.doors.contains { $0.minX < from.x && from.x < $0.maxX }
+                #expect(sameArea || throughDoor, "\(String(describing: start)) → \(String(describing: end)): \(from) → \(to)")
+            }
+            #expect(points.last == (end.map { layout.spot(for: $0) } ?? layout.elevatorSpot))
+        }
+    }
+
     @Test func convertsToSceneCoordinates() {
         let rect = CGRect(x: 10, y: 20, width: 30, height: 40)
 

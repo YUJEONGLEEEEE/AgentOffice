@@ -9,6 +9,9 @@ public final class OfficeScene: SKScene {
     public let layout: OfficeLayout
 
     private var isBuilt = false
+    private var agentNodes: [String: AgentNode] = [:]
+    private var pendingSnapshots: [AgentSnapshot]?
+    private var hasShownAgents = false
 
     public init(layout: OfficeLayout = .standard) {
         self.layout = layout
@@ -28,6 +31,63 @@ public final class OfficeScene: SKScene {
         guard !isBuilt else { return }
         isBuilt = true
         buildOffice()
+        if let pendingSnapshots {
+            self.pendingSnapshots = nil
+            show(agents: pendingSnapshots)
+        }
+    }
+
+    // MARK: - Agents
+
+    /// Shows the agents on this floor. New agents step out of the elevator, agents whose room changed
+    /// walk there through the hallway, and agents who left walk back to the elevator.
+    ///
+    /// The first call places everyone right away, so opening the app does not start a parade.
+    public func show(agents snapshots: [AgentSnapshot]) {
+        guard isBuilt else {
+            pendingSnapshots = snapshots
+            return
+        }
+
+        let present = snapshots.filter { $0.status != .left }
+        var spotIndices: [String: Int] = [:]
+        for room in Room.allCases {
+            let ids = present.filter { $0.room == room }.map(\.id).sorted()
+            for (index, id) in ids.enumerated() {
+                spotIndices[id] = index
+            }
+        }
+
+        let animate = hasShownAgents
+        hasShownAgents = true
+
+        for snapshot in present {
+            let index = spotIndices[snapshot.id] ?? 0
+            if let node = agentNodes[snapshot.id] {
+                node.apply(snapshot)
+                if node.room != snapshot.room || node.spotIndex != index {
+                    node.walk(to: snapshot.room, index: index, layout: layout)
+                }
+            } else {
+                let node = AgentNode(snapshot: snapshot)
+                agentNodes[snapshot.id] = node
+                addChild(node)
+                if animate {
+                    node.place(in: nil, index: 0, layout: layout)
+                    node.walk(to: snapshot.room, index: index, layout: layout)
+                } else {
+                    node.place(in: snapshot.room, index: index, layout: layout)
+                }
+            }
+        }
+
+        let presentIDs = Set(present.map(\.id))
+        for (id, node) in agentNodes where !presentIDs.contains(id) {
+            agentNodes[id] = nil
+            node.walk(to: nil, index: 0, layout: layout) { [weak node] in
+                node?.run(.sequence([.fadeOut(withDuration: 0.3), .removeFromParent()]))
+            }
+        }
     }
 
     // MARK: - Building

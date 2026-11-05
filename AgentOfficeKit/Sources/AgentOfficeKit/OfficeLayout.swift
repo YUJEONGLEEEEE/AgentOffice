@@ -56,6 +56,76 @@ public struct OfficeLayout: Sendable {
         }
     }
 
+    /// Where several agents in the same room stand, so they do not overlap.
+    public func spot(for room: Room, index: Int) -> CGPoint {
+        let base = spot(for: room)
+        let interior = interior(for: room).insetBy(dx: 20, dy: 20)
+        let column = index % 5
+        let row = index / 5
+        let offsets: [CGFloat] = [0, -56, 56, -112, 112]
+        let point = CGPoint(x: base.x + offsets[column], y: base.y + CGFloat(row) * 36)
+        return CGPoint(
+            x: min(max(point.x, interior.minX), interior.maxX),
+            y: min(max(point.y, interior.minY), interior.maxY)
+        )
+    }
+
+    /// Where agents step out of the elevator when they arrive, and where they leave.
+    public let elevatorSpot = CGPoint(x: 44, y: 300)
+
+    /// The vertical center of the hallway, where agents walk between rooms.
+    public var hallwayWalkY: CGFloat { hallway.midY }
+
+    /// The horizontal center of the door between a room and the hallway.
+    public func doorX(for room: Room) -> CGFloat {
+        switch room {
+        case .meetingRoom: 180
+        case .archive: 500
+        case .researchRoom: 910
+        case .devRoom: 230
+        case .desk: 620
+        case .serverRoom: 865
+        case .breakRoom: 1050
+        }
+    }
+
+    /// A point just inside a room, in front of its door.
+    public func insideDoor(for room: Room) -> CGPoint {
+        let interior = interior(for: room)
+        let isAboveHallway = interior.maxY <= hallway.minY
+        return CGPoint(x: doorX(for: room), y: isAboveHallway ? interior.maxY - 16 : interior.minY + 16)
+    }
+
+    /// The route an agent walks, in top-left coordinates. `nil` means the elevator.
+    ///
+    /// Agents leave through their room's door, walk along the hallway and enter through
+    /// the target room's door, so they never walk through walls.
+    public func path(from start: Room?, startIndex: Int = 0, to end: Room?, endIndex: Int = 0) -> [CGPoint] {
+        let target = end.map { spot(for: $0, index: endIndex) } ?? elevatorSpot
+        if start == end {
+            return [target]
+        }
+
+        var points: [CGPoint] = []
+        if let start {
+            let door = insideDoor(for: start)
+            points.append(door)
+            points.append(CGPoint(x: door.x, y: hallwayWalkY))
+        } else {
+            points.append(CGPoint(x: elevatorSpot.x, y: hallwayWalkY))
+        }
+
+        if let end {
+            let door = insideDoor(for: end)
+            points.append(CGPoint(x: door.x, y: hallwayWalkY))
+            points.append(door)
+        } else {
+            points.append(CGPoint(x: elevatorSpot.x, y: hallwayWalkY))
+        }
+        points.append(target)
+        return points
+    }
+
     /// Converts a top-left based rect to SpriteKit coordinates.
     public func sceneRect(_ rect: CGRect) -> CGRect {
         CGRect(x: rect.minX, y: size.height - rect.maxY, width: rect.width, height: rect.height)

@@ -44,6 +44,7 @@ class ViewController: NSViewController {
     private var refreshTimer: Timer?
 
     private let officeView = SKView()
+    private let officeScene = OfficeScene(layout: .standard)
     private let tableView = NSTableView()
     private let scrollView = NSScrollView()
     private let folderLabel = NSTextField(labelWithString: "")
@@ -124,7 +125,7 @@ class ViewController: NSViewController {
             keepAspectRatio,
         ])
 
-        officeView.presentScene(OfficeScene(layout: layout))
+        officeView.presentScene(officeScene)
     }
 
     private func setUpTable() {
@@ -206,9 +207,19 @@ class ViewController: NSViewController {
 
     private func reload() {
         guard let folderURL = folderAccess.folderURL else { return }
-        sessions = SessionStore(folderURL: folderURL).loadSessions()
+        let now = Date.now
+        sessions = SessionStore(folderURL: folderURL).loadSessions(now: now)
         tableView.reloadData()
         updateEmptyState()
+        updateOffice(now: now)
+    }
+
+    /// Shows the floor of the most recently active agent. Choosing a floor comes later.
+    private func updateOffice(now: Date) {
+        let snapshots = sessions.map { $0.snapshot(at: now) }
+        let floor = snapshots.first?.floor
+        officeScene.show(agents: snapshots.filter { $0.floor == floor })
+        view.window?.subtitle = floor.map { "\($0) 층" } ?? ""
     }
 
     private func updateEmptyState() {
