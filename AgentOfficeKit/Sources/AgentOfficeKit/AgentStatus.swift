@@ -1,5 +1,5 @@
 /// What an agent is doing right now.
-public enum AgentStatus: String, CaseIterable, Sendable {
+public enum AgentStatus: String, CaseIterable, Codable, Sendable {
     /// The session just started.
     case arrived
     /// The user sent a prompt and the agent is about to start.

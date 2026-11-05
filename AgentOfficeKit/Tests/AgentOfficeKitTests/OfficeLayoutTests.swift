@@ -34,6 +34,59 @@ struct OfficeLayoutTests {
         }
     }
 
+    @Test func spreadSpotsAreOnFreeFloorInsideTheRoom() {
+        for room in Room.allCases {
+            for index in 0..<8 {
+                let spot = layout.spot(for: room, index: index)
+                #expect(layout.interior(for: room).contains(spot), "\(room) #\(index)")
+                #expect(layout.isWalkable(spot), "\(room) #\(index) is on furniture or too close to a wall")
+            }
+        }
+    }
+
+    @Test func elevatorSpotIsWalkable() {
+        #expect(layout.isWalkable(layout.elevatorSpot))
+    }
+
+    @Test func furnitureIsNotWalkable() {
+        for piece in layout.furniture {
+            #expect(!layout.isWalkable(CGPoint(x: piece.midX, y: piece.midY)), "\(piece)")
+        }
+    }
+
+    /// Everything the scene draws as furniture must be listed in the layout, or agents would walk over it.
+    @Test @MainActor func layoutListsAllDrawnFurniture() {
+        let scene = OfficeScene(layout: layout)
+        scene.buildIfNeeded()
+
+        #expect(!scene.furnitureFrames.isEmpty)
+        for frame in scene.furnitureFrames {
+            #expect(layout.furniture.contains { $0.contains(frame) }, "\(frame) is drawn but not in the layout")
+        }
+    }
+
+    /// Every step of every route stays on free floor: no walls, no furniture.
+    @Test(arguments: [Room?.none] + Room.allCases.map(Optional.some))
+    func routesAvoidWallsAndFurniture(from start: Room?) {
+        for end in [Room?.none] + Room.allCases.map(Optional.some) {
+            for (startIndex, endIndex) in [(0, 0), (1, 2), (4, 3)] {
+                let first = start.map { layout.spot(for: $0, index: startIndex) } ?? layout.elevatorSpot
+                let points = [first] + layout.path(from: start, startIndex: startIndex, to: end, endIndex: endIndex)
+                let label = "\(String(describing: start)) → \(String(describing: end))"
+                for (from, to) in zip(points, points.dropFirst()) {
+                    let steps = max(1, Int(hypot(to.x - from.x, to.y - from.y)))
+                    let crossesBlockedFloor = (0...steps).contains { step in
+                        let t = CGFloat(step) / CGFloat(steps)
+                        return !layout.isWalkable(CGPoint(x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t))
+                    }
+                    #expect(!crossesBlockedFloor, "\(label): \(from) → \(to)")
+                }
+                let target = end.map { layout.spot(for: $0, index: endIndex) } ?? layout.elevatorSpot
+                #expect(points.last == target, "\(label) does not reach its spot")
+            }
+        }
+    }
+
     @Test func convertsToSceneCoordinates() {
         let rect = CGRect(x: 10, y: 20, width: 30, height: 40)
 

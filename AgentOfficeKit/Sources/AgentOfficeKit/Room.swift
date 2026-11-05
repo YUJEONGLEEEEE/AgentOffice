@@ -1,5 +1,5 @@
 /// A room in the office. Each room stands for a kind of work.
-public enum Room: String, CaseIterable, Sendable {
+public enum Room: String, CaseIterable, Codable, Sendable {
     /// The agent's own desk: arriving, receiving work, or using a tool with no dedicated room.
     case desk
     /// Reading and searching files.
