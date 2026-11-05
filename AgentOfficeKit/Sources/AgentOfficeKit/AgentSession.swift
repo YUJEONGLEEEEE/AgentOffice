@@ -72,7 +72,7 @@ public struct AgentSession: Identifiable, Equatable, Sendable {
 
         case .stop:
             recordedStatus = .resting
-            room = .desk
+            room = .breakRoom
 
         case .sessionEnd:
             recordedStatus = .left
