@@ -1,6 +1,6 @@
 /// A room in the office. Each room stands for a kind of work.
 public enum Room: String, CaseIterable, Sendable {
-    /// The agent's own desk: resting, receiving work, or using a tool with no dedicated room.
+    /// The agent's own desk: arriving, receiving work, or using a tool with no dedicated room.
     case desk
     /// Reading and searching files.
     case archive
@@ -12,6 +12,8 @@ public enum Room: String, CaseIterable, Sendable {
     case researchRoom
     /// Planning and delegating work.
     case meetingRoom
+    /// Taking a coffee break after finishing a reply.
+    case breakRoom
 
     /// Maps a tool name from a `PreToolUse` event to the room where that work happens.
     public init(tool: String) {
@@ -39,6 +41,7 @@ public enum Room: String, CaseIterable, Sendable {
         case .serverRoom: "서버실"
         case .researchRoom: "정보검색실"
         case .meetingRoom: "회의실"
+        case .breakRoom: "탕비실"
         }
     }
 }

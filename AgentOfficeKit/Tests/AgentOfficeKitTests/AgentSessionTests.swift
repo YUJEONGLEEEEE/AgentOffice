@@ -42,10 +42,22 @@ struct AgentSessionTests {
 
         session.apply(event(.stop, after: 18))
         #expect(session.status(at: start) == .resting)
-        #expect(session.room == .desk)
+        #expect(session.room == .breakRoom)
 
         session.apply(event(.sessionEnd, after: 45))
         #expect(session.status(at: start) == .left)
+    }
+
+    @Test func restsInBreakRoomThenReturnsToDeskForNextPrompt() throws {
+        var session = try #require(AgentSession(events: [
+            event(.preToolUse, tool: "Edit"),
+            event(.stop, after: 5),
+        ]))
+        #expect(session.room == .breakRoom)
+
+        session.apply(event(.userPromptSubmit, after: 30))
+        #expect(session.recordedStatus == .received)
+        #expect(session.room == .desk)
     }
 
     @Test func permissionPromptMeansWaitingInSameRoom() throws {
