@@ -18,6 +18,10 @@ let package = Package(
         .target(
             name: "AgentOfficeKit"
         ),
+        .testTarget(
+            name: "AgentOfficeKitTests",
+            dependencies: ["AgentOfficeKit"]
+        ),
     ],
     swiftLanguageModes: [.v6]
 )
