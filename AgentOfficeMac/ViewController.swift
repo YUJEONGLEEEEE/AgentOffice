@@ -6,9 +6,11 @@
 //
 
 import Cocoa
+import SpriteKit
 import AgentOfficeKit
 
-/// Shows every recent Claude Code session as a row: floor (project), agent, room, status and last activity.
+/// Shows the office floor, and every recent Claude Code session as a row:
+/// floor (project), agent, room, status and last activity.
 class ViewController: NSViewController {
 
     private enum Column: String, CaseIterable {
@@ -41,6 +43,7 @@ class ViewController: NSViewController {
     private var sessions: [AgentSession] = []
     private var refreshTimer: Timer?
 
+    private let officeView = SKView()
     private let tableView = NSTableView()
     private let scrollView = NSScrollView()
     private let folderLabel = NSTextField(labelWithString: "")
@@ -56,6 +59,7 @@ class ViewController: NSViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpHeader()
+        setUpOffice()
         setUpTable()
         setUpEmptyState()
 
@@ -70,9 +74,9 @@ class ViewController: NSViewController {
         super.viewDidAppear()
         guard let window = view.window else { return }
         window.title = "AgentOffice"
-        window.minSize = NSSize(width: 640, height: 320)
-        if window.frame.width < 720 {
-            window.setContentSize(NSSize(width: 720, height: 420))
+        window.minSize = NSSize(width: 820, height: 640)
+        if window.frame.width < 1000 {
+            window.setContentSize(NSSize(width: 1100, height: 860))
             window.center()
         }
     }
@@ -101,6 +105,28 @@ class ViewController: NSViewController {
         ])
     }
 
+    private func setUpOffice() {
+        officeView.ignoresSiblingOrder = true
+        officeView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(officeView)
+
+        let layout = OfficeLayout.standard
+        let keepAspectRatio = officeView.heightAnchor.constraint(
+            equalTo: officeView.widthAnchor,
+            multiplier: layout.size.height / layout.size.width
+        )
+        keepAspectRatio.priority = .defaultHigh
+
+        NSLayoutConstraint.activate([
+            officeView.topAnchor.constraint(equalTo: chooseFolderButton.bottomAnchor, constant: 12),
+            officeView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            officeView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            keepAspectRatio,
+        ])
+
+        officeView.presentScene(OfficeScene(layout: layout))
+    }
+
     private func setUpTable() {
         for column in Column.allCases {
             let tableColumn = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(column.rawValue))
@@ -120,7 +146,8 @@ class ViewController: NSViewController {
         view.addSubview(scrollView)
 
         NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: chooseFolderButton.bottomAnchor, constant: 12),
+            scrollView.topAnchor.constraint(equalTo: officeView.bottomAnchor, constant: 12),
+            scrollView.heightAnchor.constraint(greaterThanOrEqualToConstant: 160),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
