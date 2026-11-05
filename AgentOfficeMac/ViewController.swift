@@ -274,7 +274,7 @@ class ViewController: NSViewController {
         guard let folderURL = folderAccess.folderURL else { return }
         let now = Date.now
         office = SessionStore(folderURL: folderURL).load(now: now)
-        snapshots = office.sessions.map { $0.snapshot(at: now) }
+        snapshots = office.sessions.flatMap { $0.snapshots(at: now) }
         floors = FloorSummary.floors(from: snapshots)
         updateFloor(now: now)
     }
@@ -348,9 +348,11 @@ class ViewController: NSViewController {
 
     /// "eebe · AgentOffice". Long project names are shortened so the name plate stays small.
     private static func withProjectName(_ agent: AgentSnapshot) -> AgentSnapshot {
+        // Team members already carry their leader's name, which is enough to tell teams apart.
+        guard agent.role == nil else { return agent }
         let project = agent.floor.count > 12 ? agent.floor.prefix(11) + "…" : Substring(agent.floor)
         return AgentSnapshot(id: agent.id, name: "\(agent.name) · \(project)", floor: agent.floor,
-                             room: agent.room, status: agent.status, lastActivity: agent.lastActivity)
+                             room: agent.room, status: agent.status, lastActivity: agent.lastActivity, role: agent.role)
     }
 
     private func lastActivityText(for date: Date, now: Date) -> String {

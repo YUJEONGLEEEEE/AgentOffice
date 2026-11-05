@@ -56,12 +56,28 @@ struct ActivityEntryTests {
         #expect(Set(entries.map(\.id)).count == entries.count)
     }
 
-    @Test func ignoresSubagentTools() {
+    @Test func ignoresHelpersWithoutAgentType() {
         var list = events([(.preToolUse, "Bash")])
         list.append(AgentEvent(timestamp: start.addingTimeInterval(5), kind: .preToolUse, sessionID: "eebe4d02",
                                project: "AgentOffice", tool: "Read", agentID: "helper"))
 
+        // The leader stays in the server room; the helper without an agent type is not a team member.
         #expect(AgentSession.activity(from: list).count == 1)
+    }
+
+    @Test func recordsTeamMembersJoiningMovingAndLeaving() {
+        var list = events([(.preToolUse, "Agent")])
+        let member: [(AgentEvent.Kind, String?)] = [(.subagentStart, nil), (.preToolUse, "Read"), (.preToolUse, "Grep"), (.subagentStop, nil)]
+        for (offset, item) in member.enumerated() {
+            list.append(AgentEvent(timestamp: start.addingTimeInterval(TimeInterval(10 + offset)), kind: item.0,
+                                   sessionID: "eebe4d02", project: "AgentOffice", tool: item.1,
+                                   agentID: "a1", agentType: "market-researcher"))
+        }
+
+        let memberEntries = AgentSession.activity(from: list).filter { $0.agentID == "eebe4d02.a1" }
+        #expect(memberEntries.map(\.status) == [.arrived, .working, .left])
+        #expect(memberEntries.map(\.room) == [.meetingRoom, .archive, .archive])
+        #expect(memberEntries.first?.agentName == "리서처 · eebe")
     }
 
     @Test func summarySaysWhereTheAgentWorks() {

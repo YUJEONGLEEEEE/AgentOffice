@@ -11,6 +11,7 @@ struct AgentSessionTests {
         after seconds: TimeInterval = 0,
         tool: String? = nil,
         agentID: String? = nil,
+        agentType: String = "market-researcher",
         notification: String? = nil
     ) -> AgentEvent {
         AgentEvent(
@@ -20,6 +21,7 @@ struct AgentSessionTests {
             project: "AgentOffice",
             tool: tool,
             agentID: agentID,
+            agentType: agentID == nil ? nil : agentType,
             notification: notification
         )
     }
@@ -117,6 +119,56 @@ struct AgentSessionTests {
         ]))
 
         #expect(session.activeSubagentIDs == ["a2"])
+    }
+
+    @Test func teamMemberStartsInMeetingRoomThenMovesByTool() throws {
+        var session = try #require(AgentSession(events: [
+            event(.preToolUse, tool: "Agent"),
+            event(.subagentStart, after: 1, agentID: "a1", agentType: "ios-developer"),
+        ]))
+        let member = try #require(session.teamMembers["a1"])
+        #expect(member.room == .meetingRoom)
+        #expect(member.status == .arrived)
+        #expect(member.role.title == "iOS 개발자")
+        #expect(member.role.department == .development)
+
+        session.apply(event(.preToolUse, after: 2, tool: "Edit", agentID: "a1", agentType: "ios-developer"))
+        #expect(session.teamMembers["a1"]?.room == .devRoom)
+        #expect(session.teamMembers["a1"]?.status == .working)
+    }
+
+    @Test func ignoresInternalHelpersWithoutAgentType() throws {
+        let session = try #require(AgentSession(events: [
+            event(.sessionStart),
+            event(.subagentStart, after: 1, agentID: "x1", agentType: ""),
+            event(.preToolUse, after: 2, tool: "Read", agentID: "x1", agentType: ""),
+        ]))
+
+        #expect(session.teamMembers.isEmpty)
+    }
+
+    @Test func addsTeamMemberWhenStartWasMissed() throws {
+        let session = try #require(AgentSession(events: [
+            event(.sessionStart),
+            event(.preToolUse, after: 1, tool: "WebSearch", agentID: "a1"),
+        ]))
+
+        #expect(session.teamMembers["a1"]?.room == .researchRoom)
+    }
+
+    @Test func snapshotsIncludeTeamMembersWhileLeaderIsIn() throws {
+        let session = try #require(AgentSession(events: [
+            event(.sessionStart),
+            event(.subagentStart, after: 1, agentID: "a1", agentType: "qa-reviewer"),
+        ]))
+
+        let snapshots = session.snapshots(at: start.addingTimeInterval(2))
+        #expect(snapshots.map(\.name) == ["s1", "QA 검토자 · s1"])
+        #expect(snapshots.last?.role == "qa-reviewer")
+        #expect(snapshots.last?.id == "s1.a1")
+
+        let later = session.snapshots(at: start.addingTimeInterval(AgentSession.inactivityLimit + 10))
+        #expect(later.count == 1)
     }
 
     @Test func ignoresEventsFromOtherSessions() throws {

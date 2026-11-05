@@ -8,11 +8,12 @@ public enum AgentPortrait {
     }
 
     /// A 12 × 16 pixel image. Draw it with nearest-neighbor scaling to keep the pixels sharp.
-    public static func image(forAgentID id: String) -> CGImage? {
-        image(for: .stand, appearance: AgentAppearance(id: id))
+    /// `role` is the team member's agent type, or `nil` for a team leader.
+    public static func image(forAgentID id: String, role: String? = nil) -> CGImage? {
+        image(for: .stand, appearance: AgentAppearance(id: id, role: role.map(TeamRole.init)))
     }
 
-    /// 12 × 16 pixel maps. h hair, s skin, e eye, m mouth, t shirt, p pants, b shoes.
+    /// 12 × 16 pixel maps. h hair, s skin, e eye, m mouth, t shirt, p pants, b shoes, k tie.
     private static let standMap = [
         "...hhhhhh...",
         "..hhhhhhhh..",
@@ -53,7 +54,16 @@ public enum AgentPortrait {
 
     /// The 12 × 16 pixel picture of the agent in a pose.
     static func image(for pose: Pose, appearance: AgentAppearance) -> CGImage? {
-        let rows = map(for: pose)
+        var rows = map(for: pose)
+        if appearance.tie != nil {
+            // A tie down the middle of the shirt.
+            for row in 7...10 {
+                var pixels = Array(rows[row])
+                pixels[5] = "k"
+                pixels[6] = "k"
+                rows[row] = String(pixels)
+            }
+        }
         let width = 12, height = 16
         guard let context = CGContext(
             data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
@@ -64,6 +74,7 @@ public enum AgentPortrait {
         let colors: [Character: UInt32] = [
             "h": appearance.hair, "s": 0xF2C9A0, "e": 0x2B2B2B, "m": 0xD98A6A,
             "t": appearance.shirt, "p": 0x3A3F58, "b": 0x1F1C24,
+            "k": appearance.tie ?? appearance.shirt,
         ]
         for (rowIndex, row) in rows.enumerated() {
             for (column, character) in row.enumerated() {
