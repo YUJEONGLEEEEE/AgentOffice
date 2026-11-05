@@ -4,13 +4,21 @@ import AgentOfficeKit
 /// Reads the per-session event logs in a folder and builds the current state of each session.
 struct SessionStore {
 
-    /// Sessions whose last activity is older than this are hidden from the list.
+    /// Sessions whose last activity is older than this are hidden.
     static let visibleDuration: TimeInterval = 24 * 60 * 60
+    /// The activity log keeps this many of the latest entries.
+    static let activityLimit = 200
+
+    struct Office {
+        /// Working sessions first, then the most recently active.
+        var sessions: [AgentSession] = []
+        /// Latest first.
+        var activity: [ActivityEntry] = []
+    }
 
     let folderURL: URL
 
-    /// Working sessions first, then the most recently active.
-    func loadSessions(now: Date = .now) -> [AgentSession] {
+    func load(now: Date = .now) -> Office {
         let fileManager = FileManager.default
         let files = (try? fileManager.contentsOfDirectory(
             at: folderURL,
@@ -18,22 +26,26 @@ struct SessionStore {
             options: [.skipsHiddenFiles]
         )) ?? []
 
-        return files
-            .filter { $0.pathExtension == "jsonl" }
-            .filter { isRecentlyModified($0, now: now) }
-            .compactMap { url in
-                guard let text = try? String(contentsOf: url, encoding: .utf8) else { return nil }
-                return AgentSession(events: AgentEvent.parseLog(text))
+        var office = Office()
+        for url in files where url.pathExtension == "jsonl" && isRecentlyModified(url, now: now) {
+            guard let text = try? String(contentsOf: url, encoding: .utf8) else { continue }
+            let events = AgentEvent.parseLog(text)
+            guard let session = AgentSession(events: events),
+                  now.timeIntervalSince(session.lastActivity) < Self.visibleDuration else { continue }
+            office.sessions.append(session)
+            office.activity += AgentSession.activity(from: events)
+        }
+
+        office.sessions.sort { lhs, rhs in
+            let lhsPresent = lhs.status(at: now) != .left
+            let rhsPresent = rhs.status(at: now) != .left
+            if lhsPresent != rhsPresent {
+                return lhsPresent
             }
-            .filter { now.timeIntervalSince($0.lastActivity) < Self.visibleDuration }
-            .sorted { lhs, rhs in
-                let lhsPresent = lhs.status(at: now) != .left
-                let rhsPresent = rhs.status(at: now) != .left
-                if lhsPresent != rhsPresent {
-                    return lhsPresent
-                }
-                return lhs.lastActivity > rhs.lastActivity
-            }
+            return lhs.lastActivity > rhs.lastActivity
+        }
+        office.activity = Array(office.activity.sorted { $0.time > $1.time }.prefix(Self.activityLimit))
+        return office
     }
 
     /// Skips old log files without reading them.
