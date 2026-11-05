@@ -14,8 +14,11 @@ public struct AgentSession: Identifiable, Equatable, Sendable {
     public private(set) var project: String
     public private(set) var room: Room = .desk
     public private(set) var lastActivity: Date
+    /// Team members (subagents) that started and have not stopped yet, by agent ID.
+    public private(set) var teamMembers: [String: TeamMember] = [:]
+
     /// IDs of subagents that started and have not stopped yet.
-    public private(set) var activeSubagentIDs: Set<String> = []
+    public var activeSubagentIDs: Set<String> { Set(teamMembers.keys) }
 
     /// The status from the events alone, without the inactivity rule. Use `status(at:)` for display.
     public private(set) var recordedStatus: AgentStatus = .arrived
@@ -48,6 +51,7 @@ public struct AgentSession: Identifiable, Equatable, Sendable {
 
         // Subagents are tracked separately; they do not move the main agent.
         if event.isFromSubagent, event.kind == .preToolUse {
+            applyTeamMemberTool(event)
             return
         }
 
@@ -55,7 +59,7 @@ public struct AgentSession: Identifiable, Equatable, Sendable {
         case .sessionStart:
             recordedStatus = .arrived
             room = .desk
-            activeSubagentIDs.removeAll()
+            teamMembers.removeAll()
 
         case .userPromptSubmit:
             recordedStatus = .received
@@ -76,21 +80,38 @@ public struct AgentSession: Identifiable, Equatable, Sendable {
 
         case .sessionEnd:
             recordedStatus = .left
-            activeSubagentIDs.removeAll()
+            teamMembers.removeAll()
 
         case .subagentStart:
-            if let agentID = event.agentID {
-                activeSubagentIDs.insert(agentID)
+            // Internal helpers of Claude Code have no agent type; they are not team members.
+            if let agentID = event.agentID, let agentType = event.agentType, !agentType.isEmpty {
+                // New team members get their briefing in the meeting room first.
+                teamMembers[agentID] = TeamMember(id: agentID, role: TeamRole(agentType: agentType),
+                                                  room: .meetingRoom, status: .arrived, lastActivity: event.timestamp)
             }
 
         case .subagentStop:
             if let agentID = event.agentID {
-                activeSubagentIDs.remove(agentID)
+                teamMembers[agentID] = nil
             }
 
         case .unknown:
             break
         }
+    }
+
+    /// A tool call from a team member moves that member, not the leader.
+    private mutating func applyTeamMemberTool(_ event: AgentEvent) {
+        guard let agentID = event.agentID else { return }
+        if teamMembers[agentID] == nil {
+            // The start event was missed, for example when the app was installed mid-task.
+            guard let agentType = event.agentType, !agentType.isEmpty else { return }
+            teamMembers[agentID] = TeamMember(id: agentID, role: TeamRole(agentType: agentType),
+                                              room: .meetingRoom, status: .arrived, lastActivity: event.timestamp)
+        }
+        teamMembers[agentID]?.status = .working
+        teamMembers[agentID]?.room = event.tool.map(Room.init(tool:)) ?? .desk
+        teamMembers[agentID]?.lastActivity = event.timestamp
     }
 
     /// The status to show at the given time, applying the inactivity rule.
@@ -100,4 +121,13 @@ public struct AgentSession: Identifiable, Equatable, Sendable {
         }
         return recordedStatus
     }
+}
+
+/// A team member (subagent) working for a session's leader.
+public struct TeamMember: Identifiable, Equatable, Sendable {
+    public let id: String
+    public let role: TeamRole
+    public var room: Room
+    public var status: AgentStatus
+    public var lastActivity: Date
 }

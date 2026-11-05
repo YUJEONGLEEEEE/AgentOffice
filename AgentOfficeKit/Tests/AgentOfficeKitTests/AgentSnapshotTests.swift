@@ -35,7 +35,17 @@ struct AgentSnapshotTests {
         let data = try JSONEncoder().encode(snapshot)
         let keys = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any]).keys
 
+        // Leaders have no role, so the key is left out.
         #expect(Set(keys) == ["id", "name", "floor", "room", "status", "lastActivity"])
+    }
+
+    @Test func teamMemberSnapshotAddsOnlyItsRole() throws {
+        let snapshot = AgentSnapshot(id: "s1.a1", name: "리서처 · s1", floor: "AgentOffice", room: .researchRoom,
+                                     status: .working, lastActivity: start, role: "market-researcher")
+        let data = try JSONEncoder().encode(snapshot)
+        let keys = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any]).keys
+
+        #expect(Set(keys) == ["id", "name", "floor", "room", "status", "lastActivity", "role"])
     }
 }
 
@@ -45,10 +55,30 @@ struct AgentAppearanceTests {
         #expect(AgentAppearance(id: "eebe4d02") == AgentAppearance(id: "eebe4d02"))
     }
 
-    @Test func usesPaletteColors() {
+    @Test func leaderWearsSuitAndTie() {
         let appearance = AgentAppearance(id: "e77b1e86")
 
         #expect(AgentAppearance.hairColors.contains(appearance.hair))
-        #expect(AgentAppearance.shirtColors.contains(appearance.shirt))
+        #expect(appearance.shirt == AgentAppearance.suitColor)
+        #expect(appearance.tie != nil)
+    }
+
+    @Test func teamMemberWearsDepartmentUniform() {
+        let appearance = AgentAppearance(id: "a1", role: TeamRole(agentType: "ui-designer"))
+
+        #expect(appearance.shirt == Department.design.uniform)
+        #expect(appearance.tie == nil)
+    }
+
+    @Test func everyDepartmentHasItsOwnUniform() {
+        let uniforms = Department.allCases.map(\.uniform)
+        #expect(Set(uniforms).count == uniforms.count)
+        #expect(!uniforms.contains(AgentAppearance.suitColor))
+    }
+
+    @Test func unknownAgentTypeJoinsSupport() {
+        let role = TeamRole(agentType: "my-helper")
+        #expect(role.title == "my-helper")
+        #expect(role.department == .support)
     }
 }

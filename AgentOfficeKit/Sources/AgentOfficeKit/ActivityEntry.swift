@@ -37,32 +37,53 @@ public struct ActivityEntry: Identifiable, Equatable, Sendable {
 
 extension AgentSession {
 
-    /// Replays a session's events and keeps one entry each time the room or status changes.
+    /// Replays a session's events and keeps one entry each time someone's room or status changes:
+    /// the leader, or a team member joining, moving or finishing.
     /// Several tools in a row in the same room count as one entry, so the log stays short.
     public static func activity(from events: [AgentEvent]) -> [ActivityEntry] {
         var session: AgentSession?
         var entries: [ActivityEntry] = []
+        var previous: [String: (name: String, room: Room, status: AgentStatus)] = [:]
 
         for event in events {
-            let before = session.map { ($0.room, $0.recordedStatus) }
             if session == nil {
                 session = AgentSession(firstEvent: event)
             } else {
                 session?.apply(event)
             }
             guard let current = session, event.sessionID == current.id else { continue }
-            if let before, before == (current.room, current.recordedStatus) {
-                continue
+
+            let leaderName = String(current.id.prefix(4))
+            var people: [String: (name: String, room: Room, status: AgentStatus)] = [
+                current.id: (leaderName, current.room, current.recordedStatus),
+            ]
+            for member in current.teamMembers.values {
+                people["\(current.id).\(member.id)"] = ("\(member.role.title) · \(leaderName)", member.room, member.status)
             }
-            entries.append(ActivityEntry(
-                id: "\(current.id)-\(entries.count)",
-                time: event.timestamp,
-                agentID: current.id,
-                agentName: String(current.id.prefix(4)),
-                floor: current.project,
-                room: current.room,
-                status: current.recordedStatus
-            ))
+
+            func record(_ personID: String, _ state: (name: String, room: Room, status: AgentStatus)) {
+                entries.append(ActivityEntry(
+                    id: "\(current.id)-\(entries.count)",
+                    time: event.timestamp,
+                    agentID: personID,
+                    agentName: state.name,
+                    floor: current.project,
+                    room: state.room,
+                    status: state.status
+                ))
+            }
+
+            for (personID, state) in people.sorted(by: { $0.key < $1.key }) {
+                if let before = previous[personID], before.room == state.room, before.status == state.status {
+                    continue
+                }
+                record(personID, state)
+            }
+            // Team members who finished go home.
+            for (personID, state) in previous.sorted(by: { $0.key < $1.key }) where people[personID] == nil {
+                record(personID, (state.name, state.room, .left))
+            }
+            previous = people
         }
         return entries
     }

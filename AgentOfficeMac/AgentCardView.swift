@@ -74,7 +74,7 @@ final class AgentCardView: NSView {
     func configure(with snapshot: AgentSnapshot, helpers: Int, floorName: String?, lastActivityText: String) {
         if agentID != snapshot.id {
             agentID = snapshot.id
-            portrait.layer?.contents = AgentPortrait.image(forAgentID: snapshot.id)
+            portrait.layer?.contents = AgentPortrait.image(forAgentID: snapshot.id, role: snapshot.role)
         }
         nameLabel.stringValue = snapshot.name
         tagLabel.stringValue = snapshot.status.displayName

@@ -22,13 +22,14 @@ final class AgentNode: SKNode {
     private let tagBorder = SKSpriteNode()
     private let tagLabel = SKLabelNode()
     private let nameLabel = SKLabelNode()
+    private let namePlate = SKSpriteNode()
     private var textures: [Pose: SKTexture] = [:]
     private var status: AgentStatus = .arrived
     private var pendingWalk: (() -> Void)?
 
     init(snapshot: AgentSnapshot) {
         agentID = snapshot.id
-        appearance = AgentAppearance(id: snapshot.id)
+        appearance = AgentAppearance(id: snapshot.id, role: snapshot.role.map(TeamRole.init))
         super.init()
 
         for pose in [Pose.stand, .walkA, .walkB, .raisedHand] {
@@ -69,8 +70,8 @@ final class AgentNode: SKNode {
         nameLabel.fontSize = 9
         nameLabel.fontColor = OfficePalette.signText
         nameLabel.verticalAlignmentMode = .top
-        let namePlate = SKSpriteNode(color: OfficePalette.wall.withAlphaComponent(0.8),
-                                     size: CGSize(width: nameLabel.frame.width + 8, height: 12))
+        namePlate.color = OfficePalette.wall.withAlphaComponent(0.8)
+        namePlate.size = CGSize(width: nameLabel.frame.width + 8, height: 12)
         namePlate.anchorPoint = CGPoint(x: 0.5, y: 1)
         namePlate.position = CGPoint(x: 0, y: -2)
         namePlate.zPosition = 5
@@ -175,10 +176,12 @@ final class AgentNode: SKNode {
         run(.sequence(steps), withKey: "walk")
     }
 
-    /// Neighbors in the same room alternate tag heights so their tags do not overlap.
+    /// Neighbors in the same room alternate tag and name plate heights so they do not overlap.
     private func updateTagHeight() {
         let base = body.size.height + 14
-        tag.position = CGPoint(x: 0, y: spotIndex % 2 == 1 ? base + 22 : base)
+        let isOdd = spotIndex % 2 == 1
+        tag.position = CGPoint(x: 0, y: isOdd ? base + 22 : base)
+        namePlate.position = CGPoint(x: 0, y: isOdd ? -16 : -2)
     }
 
     private func showRestingPose() {
