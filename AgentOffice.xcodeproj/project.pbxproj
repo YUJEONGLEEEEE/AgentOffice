@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		78118E0A308DD987008163A7 /* AgentOfficeKit in Frameworks */ = {isa = PBXBuildFile; productRef = 78118E09308DD987008163A7 /* AgentOfficeKit */; };
+		78118E0E308DDABA008163A7 /* AgentOfficeKit in Frameworks */ = {isa = PBXBuildFile; productRef = 78118E0D308DDABA008163A7 /* AgentOfficeKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		78E5E8C0308B6BFB00F9DBD0 /* AgentOffice.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AgentOffice.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		78E5E919308C7A5B00F9DBD0 /* AgentOfficeMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AgentOfficeMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -42,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				78118E0A308DD987008163A7 /* AgentOfficeKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -49,6 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				78118E0E308DDABA008163A7 /* AgentOfficeKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,6 +100,7 @@
 			);
 			name = AgentOffice;
 			packageProductDependencies = (
+				78118E09308DD987008163A7 /* AgentOfficeKit */,
 			);
 			productName = AgentOffice;
 			productReference = 78E5E8C0308B6BFB00F9DBD0 /* AgentOffice.app */;
@@ -115,6 +123,7 @@
 			);
 			name = AgentOfficeMac;
 			packageProductDependencies = (
+				78118E0D308DDABA008163A7 /* AgentOfficeKit */,
 			);
 			productName = AgentOfficeMac;
 			productReference = 78E5E919308C7A5B00F9DBD0 /* AgentOfficeMac.app */;
@@ -147,6 +156,9 @@
 			);
 			mainGroup = 78E5E8B7308B6BFB00F9DBD0;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				78118E08308DD987008163A7 /* XCLocalSwiftPackageReference "AgentOfficeKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 78E5E8C1308B6BFB00F9DBD0 /* Products */;
 			projectDirPath = "";
@@ -477,6 +489,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		78118E08308DD987008163A7 /* XCLocalSwiftPackageReference "AgentOfficeKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = AgentOfficeKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		78118E09308DD987008163A7 /* AgentOfficeKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AgentOfficeKit;
+		};
+		78118E0D308DDABA008163A7 /* AgentOfficeKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 78118E08308DD987008163A7 /* XCLocalSwiftPackageReference "AgentOfficeKit" */;
+			productName = AgentOfficeKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 78E5E8B8308B6BFB00F9DBD0 /* Project object */;
 }
