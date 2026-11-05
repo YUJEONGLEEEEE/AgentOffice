@@ -24,3 +24,27 @@ public enum AgentStatus: String, CaseIterable, Codable, Sendable {
         }
     }
 }
+
+extension AgentStatus {
+
+    /// Background color of the status tag, shared by the office scene and the app's cards.
+    public var tagColor: UInt32 {
+        switch self {
+        case .working: 0xF2B33D
+        case .waiting: 0xE8684A
+        case .resting: 0xBFE3C8
+        case .arrived, .received: 0xBFD7F5
+        case .left: 0xC9C0B0
+        }
+    }
+
+    /// Text color on top of `tagColor`.
+    public var tagTextColor: UInt32 {
+        switch self {
+        case .working, .left: 0x2E2A35
+        case .waiting: 0x1F1C24
+        case .resting: 0x1F3A28
+        case .arrived, .received: 0x1E3350
+        }
+    }
+}

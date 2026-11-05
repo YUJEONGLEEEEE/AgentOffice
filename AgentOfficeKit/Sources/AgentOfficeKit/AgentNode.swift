@@ -3,9 +3,7 @@ import SpriteKit
 /// One agent character in the office: a pixel sprite, a status tag above its head and a name below.
 final class AgentNode: SKNode {
 
-    enum Pose {
-        case stand, walkA, walkB, raisedHand
-    }
+    typealias Pose = AgentPortrait.Pose
 
     private static let pixelScale: CGFloat = 3
     private static let walkSpeed: CGFloat = 140
@@ -206,82 +204,12 @@ final class AgentNode: SKNode {
     }
 
     private static func tagStyle(for status: AgentStatus, room: Room) -> TagStyle {
-        switch status {
-        case .working:
-            TagStyle(text: "일하는 중", background: SKColor(hex: 0xF2B33D), foreground: SKColor(hex: 0x2E2A35))
-        case .waiting:
-            TagStyle(text: "기다리는 중", background: SKColor(hex: 0xE8684A), foreground: SKColor(hex: 0x1F1C24))
-        case .resting:
-            TagStyle(text: room == .breakRoom ? "쉬는 중 · 커피" : "쉬는 중",
-                     background: SKColor(hex: 0xBFE3C8), foreground: SKColor(hex: 0x1F3A28))
-        case .arrived, .received:
-            TagStyle(text: status.displayName, background: SKColor(hex: 0xBFD7F5), foreground: SKColor(hex: 0x1E3350))
-        case .left:
-            TagStyle(text: status.displayName, background: SKColor(hex: 0xC9C0B0), foreground: SKColor(hex: 0x2E2A35))
-        }
-    }
-
-    /// 12 × 16 pixel maps. h hair, s skin, e eye, m mouth, t shirt, p pants, b shoes.
-    private static let standMap = [
-        "...hhhhhh...",
-        "..hhhhhhhh..",
-        "..hhhhhhhh..",
-        "..hssssssh..",
-        "..hsessesh..",
-        "...ssssss...",
-        "...ssmmss...",
-        "..tttttttt..",
-        ".tttttttttt.",
-        ".tttttttttt.",
-        ".tttttttttt.",
-        ".stttttttts.",
-        "...pppppp...",
-        "...pp..pp...",
-        "...pp..pp...",
-        "...bb..bb...",
-    ]
-
-    private static func map(for pose: Pose) -> [String] {
-        var rows = standMap.map { Array($0) }
-        switch pose {
-        case .stand:
-            break
-        case .walkA:
-            rows[14] = Array("..pp...pp...")
-            rows[15] = Array("..bb....bb..")
-        case .walkB:
-            rows[14] = Array("....pp..pp..")
-            rows[15] = Array("....bb...bb.")
-        case .raisedHand:
-            for row in 8...11 { rows[row][10] = "." }
-            for row in 4...7 { rows[row][10] = "t" }
-            rows[3][10] = "s"
-        }
-        return rows.map { String($0) }
+        let text = status == .resting && room == .breakRoom ? "쉬는 중 · 커피" : status.displayName
+        return TagStyle(text: text, background: SKColor(hex: status.tagColor), foreground: SKColor(hex: status.tagTextColor))
     }
 
     private static func texture(for pose: Pose, appearance: AgentAppearance) -> SKTexture {
-        let rows = map(for: pose)
-        let width = 12, height = 16
-        guard let context = CGContext(
-            data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
-            space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-        ) else { return SKTexture() }
-
-        let colors: [Character: UInt32] = [
-            "h": appearance.hair, "s": 0xF2C9A0, "e": 0x2B2B2B, "m": 0xD98A6A,
-            "t": appearance.shirt, "p": 0x3A3F58, "b": 0x1F1C24,
-        ]
-        for (rowIndex, row) in rows.enumerated() {
-            for (column, character) in row.enumerated() {
-                guard let hex = colors[character] else { continue }
-                context.setFillColor(SKColor(hex: hex).cgColor)
-                // CoreGraphics draws from the bottom, so flip the row.
-                context.fill(CGRect(x: column, y: height - 1 - rowIndex, width: 1, height: 1))
-            }
-        }
-        guard let image = context.makeImage() else { return SKTexture() }
+        guard let image = AgentPortrait.image(for: pose, appearance: appearance) else { return SKTexture() }
         let texture = SKTexture(cgImage: image)
         texture.filteringMode = .nearest
         return texture

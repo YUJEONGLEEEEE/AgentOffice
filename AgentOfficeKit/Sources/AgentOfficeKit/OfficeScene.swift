@@ -90,6 +90,16 @@ public final class OfficeScene: SKScene {
         }
     }
 
+    /// Removes every agent at once, for example when switching to another floor.
+    /// The next `show(agents:)` places the new floor's agents without walking.
+    public func removeAllAgents() {
+        for node in agentNodes.values {
+            node.removeFromParent()
+        }
+        agentNodes.removeAll()
+        hasShownAgents = false
+    }
+
     // MARK: - Building
 
     func buildIfNeeded() {
