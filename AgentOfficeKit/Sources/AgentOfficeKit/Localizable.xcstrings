@@ -371,6 +371,26 @@
         }
       }
     },
+    "Show the building" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3D 건물로 보기"
+          }
+        }
+      }
+    },
+    "Show the floor plan" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2D 평면도로 보기"
+          }
+        }
+      }
+    },
     "Strategy Team" : {
       "localizations" : {
         "ko" : {

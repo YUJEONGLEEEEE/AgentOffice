@@ -1,4 +1,5 @@
 import AppKit
+import AgentOfficeKit
 
 /// The menu bar. AgentOffice only shows the office, so it keeps the standard menus
 /// a viewer app needs and leaves out document commands like Save and Print.
@@ -51,9 +52,13 @@ enum MainMenu {
         return menu
     }
 
-    /// macOS adds "Enter Full Screen" to this menu by itself.
+    /// The two ways to see the office. macOS adds "Enter Full Screen" to this menu by itself.
     private static func viewMenu() -> NSMenu {
-        NSMenu(title: String(localized: "View"))
+        let menu = NSMenu(title: String(localized: "View"))
+        menu.addItem(withTitle: OfficeViewStyle.flat.title, action: #selector(AppDelegate.showFlatOffice(_:)), keyEquivalent: "1")
+        menu.addItem(withTitle: OfficeViewStyle.building.title, action: #selector(AppDelegate.showBuilding(_:)), keyEquivalent: "2")
+        menu.addItem(.separator())
+        return menu
     }
 
     private static func windowMenu() -> NSMenu {
