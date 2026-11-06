@@ -91,6 +91,16 @@
         }
       }
     },
+    "Close" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "닫기"
+          }
+        }
+      }
+    },
     "Contest Analyst" : {
       "localizations" : {
         "ko" : {
@@ -161,6 +171,16 @@
         }
       }
     },
+    "Drag to turn · Pinch or scroll to zoom · Click a person for details" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "드래그해서 돌리기 · 핀치나 스크롤로 확대 · 사람을 누르면 정보"
+          }
+        }
+      }
+    },
     "Empty" : {
       "localizations" : {
         "ko" : {
@@ -177,6 +197,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "탐색 담당"
+          }
+        }
+      }
+    },
+    "Floor in 3D" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3D 층"
           }
         }
       }
