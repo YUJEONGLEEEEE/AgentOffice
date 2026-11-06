@@ -30,10 +30,13 @@ struct SessionStore {
         for url in files where url.pathExtension == "jsonl" && isRecentlyModified(url, now: now) {
             guard let text = try? String(contentsOf: url, encoding: .utf8) else { continue }
             let events = AgentEvent.parseLog(text)
-            guard let session = AgentSession(events: events),
-                  now.timeIntervalSince(session.lastActivity) < Self.visibleDuration else { continue }
+            guard let recorded = AgentSession(events: events),
+                  now.timeIntervalSince(recorded.lastActivity) < Self.visibleDuration,
+                  // A deleted project folder takes its floor with it; a renamed one moves the floor.
+                  let session = recorded.followingProjectFolder() else { continue }
             office.sessions.append(session)
-            office.activity += AgentSession.activity(from: events)
+            let activity = AgentSession.activity(from: events)
+            office.activity += session.project == recorded.project ? activity : activity.map { $0.onFloor(session.project) }
         }
 
         office.sessions.sort { lhs, rhs in

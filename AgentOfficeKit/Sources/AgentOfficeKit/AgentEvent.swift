@@ -32,6 +32,9 @@ public struct AgentEvent: Codable, Equatable, Sendable {
     public let agentID: String?
     public let agentType: String?
     public let notification: String?
+    /// The project folder's volume and file number, so the app can follow a rename or notice a deletion.
+    /// Older logs do not have them.
+    public let projectFolder: ProjectFolderID?
 
     public init(
         timestamp: Date,
@@ -41,7 +44,8 @@ public struct AgentEvent: Codable, Equatable, Sendable {
         tool: String? = nil,
         agentID: String? = nil,
         agentType: String? = nil,
-        notification: String? = nil
+        notification: String? = nil,
+        projectFolder: ProjectFolderID? = nil
     ) {
         self.timestamp = timestamp
         self.kind = kind
@@ -51,6 +55,40 @@ public struct AgentEvent: Codable, Equatable, Sendable {
         self.agentID = agentID
         self.agentType = agentType
         self.notification = notification
+        self.projectFolder = projectFolder
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        timestamp = try container.decode(Date.self, forKey: .timestamp)
+        kind = try container.decode(Kind.self, forKey: .kind)
+        sessionID = try container.decode(String.self, forKey: .sessionID)
+        project = try container.decode(String.self, forKey: .project)
+        tool = try container.decodeIfPresent(String.self, forKey: .tool)
+        agentID = try container.decodeIfPresent(String.self, forKey: .agentID)
+        agentType = try container.decodeIfPresent(String.self, forKey: .agentType)
+        notification = try container.decodeIfPresent(String.self, forKey: .notification)
+        // A broken folder ID must not hide the event.
+        if let device = try? container.decodeIfPresent(Int32.self, forKey: .projectDevice),
+           let inode = try? container.decodeIfPresent(UInt64.self, forKey: .projectInode) {
+            projectFolder = ProjectFolderID(device: device, inode: inode)
+        } else {
+            projectFolder = nil
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(timestamp, forKey: .timestamp)
+        try container.encode(kind.rawValue, forKey: .kind)
+        try container.encode(sessionID, forKey: .sessionID)
+        try container.encode(project, forKey: .project)
+        try container.encodeIfPresent(tool, forKey: .tool)
+        try container.encodeIfPresent(agentID, forKey: .agentID)
+        try container.encodeIfPresent(agentType, forKey: .agentType)
+        try container.encodeIfPresent(notification, forKey: .notification)
+        try container.encodeIfPresent(projectFolder?.device, forKey: .projectDevice)
+        try container.encodeIfPresent(projectFolder?.inode, forKey: .projectInode)
     }
 
     /// True when the event came from a subagent rather than the main session agent.
@@ -67,6 +105,8 @@ public struct AgentEvent: Codable, Equatable, Sendable {
         case agentID = "agentId"
         case agentType
         case notification
+        case projectDevice
+        case projectInode
     }
 }
 
