@@ -38,6 +38,10 @@ class ViewController: NSViewController {
     private let officeView = SKView()
     private let officeScene = OfficeScene(layout: .standard)
     private let buildingScene = BuildingScene()
+    private let floorModel = FloorModel3D()
+    private lazy var floorView = FloorHostingView(model: floorModel)
+    /// The floor open in 3D, so the camera resets when another floor opens.
+    private var floorIn3D: String?
     /// 2D shows the floor plan; 3D shows the building, and a floor opens when picked.
     private(set) var viewStyle = OfficeViewStyle.saved()
     private let styleSwitch = NSSegmentedControl(labels: OfficeViewStyle.allCases.map(\.title), trackingMode: .selectOne, target: nil, action: nil)
@@ -256,7 +260,8 @@ class ViewController: NSViewController {
         let officeArea = NSLayoutGuide()
         view.addLayoutGuide(officeArea)
 
-        for subview in [header, floorPanel, officeView, activityPanel, cardScroll, emptyStateLabel, backToBuildingButton] {
+        floorView.isHidden = true
+        for subview in [header, floorPanel, officeView, floorView, activityPanel, cardScroll, emptyStateLabel, backToBuildingButton] {
             subview.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(subview)
         }
@@ -305,8 +310,14 @@ class ViewController: NSViewController {
             cardScroll.heightAnchor.constraint(equalToConstant: AgentCardView.size.height + 18),
             cardScroll.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -12),
 
-            backToBuildingButton.topAnchor.constraint(equalTo: officeView.topAnchor, constant: 10),
-            backToBuildingButton.leadingAnchor.constraint(equalTo: officeView.leadingAnchor, constant: 10),
+            // The 3D floor has no fixed aspect ratio, so it fills the whole office area.
+            floorView.topAnchor.constraint(equalTo: officeArea.topAnchor),
+            floorView.bottomAnchor.constraint(equalTo: officeArea.bottomAnchor),
+            floorView.leadingAnchor.constraint(equalTo: officeArea.leadingAnchor),
+            floorView.trailingAnchor.constraint(equalTo: officeArea.trailingAnchor),
+
+            backToBuildingButton.topAnchor.constraint(equalTo: officeArea.topAnchor, constant: 10),
+            backToBuildingButton.leadingAnchor.constraint(equalTo: officeArea.leadingAnchor, constant: 10),
 
             emptyStateLabel.centerXAnchor.constraint(equalTo: officeView.centerXAnchor),
             emptyStateLabel.centerYAnchor.constraint(equalTo: officeView.centerYAnchor),
@@ -376,13 +387,26 @@ class ViewController: NSViewController {
         // The team is always in the office; members with work on this floor show that work.
         let agents = OfficeTeam.arrange(floor.map { name in snapshots.filter { $0.floor == name } } ?? snapshots)
         let showsBuilding = viewStyle == .building && floor == nil
-        if showsBuilding {
-            present(buildingScene)
-            buildingScene.show(agents: snapshots)
+        let shows3DFloor = viewStyle == .building && floor != nil
+        officeView.isHidden = shows3DFloor
+        officeView.isPaused = shows3DFloor
+        floorView.isHidden = !shows3DFloor
+        if shows3DFloor {
+            if floorIn3D != floor {
+                floorModel.resetCamera()
+                floorIn3D = floor
+            }
+            floorModel.agents = agents
         } else {
-            present(officeScene)
-            // In the whole office, name plates also say which project each agent works on.
-            officeScene.show(agents: floor == nil ? agents.map(Self.withProjectName) : agents)
+            floorIn3D = nil
+            if showsBuilding {
+                present(buildingScene)
+                buildingScene.show(agents: snapshots)
+            } else {
+                present(officeScene)
+                // In the whole office, name plates also say which project each agent works on.
+                officeScene.show(agents: floor == nil ? agents.map(Self.withProjectName) : agents)
+            }
         }
         backToBuildingButton.isHidden = !(viewStyle == .building && floor != nil)
         floorActivity = floor.map { name in office.activity.filter { $0.floor == name } } ?? office.activity

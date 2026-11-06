@@ -292,7 +292,7 @@ public struct OfficeLayout: Sendable {
 }
 
 /// A small binary heap for the route search.
-private struct MinHeap {
+struct MinHeap {
     private var items: [(value: Int, priority: Int)] = []
 
     mutating func push(_ value: Int, priority: Int) {
