@@ -50,8 +50,8 @@ final class EventFolderAccess {
         panel.canChooseFiles = false
         panel.allowsMultipleSelection = false
         panel.directoryURL = Self.defaultFolderURL
-        panel.message = "Claude Code 기록이 쌓이는 Events 폴더를 선택하세요."
-        panel.prompt = "선택"
+        panel.message = String(localized: "Choose the Events folder where Claude Code records its activity.")
+        panel.prompt = String(localized: "Choose")
 
         panel.beginSheetModal(for: window) { [weak self] response in
             guard let self, response == .OK, let url = panel.url else {

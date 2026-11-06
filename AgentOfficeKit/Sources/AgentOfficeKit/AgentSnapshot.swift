@@ -6,7 +6,8 @@ import Foundation
 /// that will later be synced to iPhone, so it must never carry prompts, code, commands or paths.
 public struct AgentSnapshot: Identifiable, Equatable, Codable, Sendable {
     public let id: String
-    /// A short display name, for example the first characters of the session ID.
+    /// A short name, for example the first characters of the session ID.
+    /// For a team member it is the leader's name; `displayName` adds the job title.
     public let name: String
     /// The project folder name. Each project is one floor of the office.
     public let floor: String
@@ -25,6 +26,14 @@ public struct AgentSnapshot: Identifiable, Equatable, Codable, Sendable {
         self.lastActivity = lastActivity
         self.role = role
     }
+
+    /// The name on the name plate. A team member's job title is added here, on each device,
+    /// so it appears in that device's language: "Researcher · eebe", or "Researcher" at their desk.
+    public var displayName: String {
+        guard let role else { return name }
+        let title = TeamRole(agentType: role).title
+        return name.isEmpty ? title : "\(title) · \(name)"
+    }
 }
 
 extension AgentSession {
@@ -42,14 +51,14 @@ extension AgentSession {
     }
 
     /// The leader and, while the leader is in the office, every team member.
-    /// Team members are named after their job and their leader, for example "리서처 · eebe".
+    /// Team members carry their leader's name; `displayName` adds their job, for example "Researcher · eebe".
     public func snapshots(at now: Date) -> [AgentSnapshot] {
         let leader = snapshot(at: now)
         guard leader.status != .left else { return [leader] }
         let members = teamMembers.values.sorted { $0.id < $1.id }.map { member in
             AgentSnapshot(
                 id: "\(id).\(member.id)",
-                name: "\(member.role.title) · \(leader.name)",
+                name: leader.name,
                 floor: project,
                 room: member.room,
                 status: member.status,

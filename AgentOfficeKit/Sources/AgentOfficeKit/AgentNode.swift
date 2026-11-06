@@ -67,7 +67,7 @@ final class AgentNode: SKNode {
         tag.zPosition = 5
         addChild(tag)
 
-        nameLabel.text = snapshot.name
+        nameLabel.text = snapshot.displayName
         nameLabel.fontName = "Menlo-Bold"
         nameLabel.fontSize = 9
         nameLabel.fontColor = OfficePalette.signText
@@ -95,9 +95,9 @@ final class AgentNode: SKNode {
     /// Updates the tag and pose for the latest status.
     func apply(_ snapshot: AgentSnapshot) {
         status = snapshot.status
-        if nameLabel.text != snapshot.name {
+        if nameLabel.text != snapshot.displayName {
             // A team member's name plate says who they are working for, so it changes between tasks.
-            nameLabel.text = snapshot.name
+            nameLabel.text = snapshot.displayName
             namePlate.size = CGSize(width: nameLabel.frame.width + 8, height: 12)
         }
         let style = Self.tagStyle(for: snapshot.status, room: snapshot.room)
@@ -215,7 +215,7 @@ final class AgentNode: SKNode {
     }
 
     private static func tagStyle(for status: AgentStatus, room: Room) -> TagStyle {
-        let text = status == .resting && room == .breakRoom ? "쉬는 중 · 커피" : status.displayName
+        let text = status == .resting && room == .breakRoom ? String(localized: "Resting · Coffee", bundle: .module) : status.displayName
         return TagStyle(text: text, background: SKColor(hex: status.tagColor), foreground: SKColor(hex: status.tagTextColor))
     }
 

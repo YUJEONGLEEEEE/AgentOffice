@@ -10,7 +10,7 @@ struct OfficeTeamTests {
 
     private func job(_ id: String, role: String, room: Room = .archive, status: AgentStatus = .working,
                      minutesAgo: Double = 0) -> AgentSnapshot {
-        AgentSnapshot(id: id, name: "\(TeamRole(agentType: role).title) · eebe", floor: "AgentOffice", room: room,
+        AgentSnapshot(id: id, name: "eebe", floor: "AgentOffice", room: room,
                       status: status, lastActivity: now.addingTimeInterval(-minutesAgo * 60), role: role)
     }
 
@@ -58,7 +58,7 @@ struct OfficeTeamTests {
 
         #expect(arranged.count == 9)
         #expect(arranged.allSatisfy { $0.status == .idle })
-        #expect(arranged.map(\.name).contains("리서처"))
+        #expect(arranged.map(\.displayName).contains(TeamRole(agentType: "market-researcher").title))
     }
 
     @Test func memberWithWorkKeepsTheirCharacter() throws {
@@ -69,7 +69,7 @@ struct OfficeTeamTests {
         #expect(researcher.id == OfficeTeam.residentID(for: "market-researcher"))
         #expect(researcher.status == .working)
         #expect(researcher.room == .researchRoom)
-        #expect(researcher.name == "리서처 · eebe")
+        #expect(researcher.displayName == "\(TeamRole(agentType: "market-researcher").title) · eebe")
     }
 
     @Test func extraJobsForTheSameMemberAppearAsExtraCharacters() {

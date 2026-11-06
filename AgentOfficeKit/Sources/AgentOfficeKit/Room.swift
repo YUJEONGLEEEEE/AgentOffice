@@ -1,3 +1,5 @@
+import Foundation
+
 /// A room in the office. Each room stands for a kind of work.
 public enum Room: String, CaseIterable, Codable, Sendable {
     /// The agent's own desk: arriving, receiving work, or using a tool with no dedicated room.
@@ -35,13 +37,13 @@ public enum Room: String, CaseIterable, Codable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .desk: "자기 자리"
-        case .archive: "자료실"
-        case .devRoom: "개발실"
-        case .serverRoom: "서버실"
-        case .researchRoom: "정보검색실"
-        case .meetingRoom: "회의실"
-        case .breakRoom: "탕비실"
+        case .desk: String(localized: "Desk", bundle: .module)
+        case .archive: String(localized: "Archive", bundle: .module)
+        case .devRoom: String(localized: "Dev Room", bundle: .module)
+        case .serverRoom: String(localized: "Server Room", bundle: .module)
+        case .researchRoom: String(localized: "Research Room", bundle: .module)
+        case .meetingRoom: String(localized: "Meeting Room", bundle: .module)
+        case .breakRoom: String(localized: "Break Room", bundle: .module)
         }
     }
 }

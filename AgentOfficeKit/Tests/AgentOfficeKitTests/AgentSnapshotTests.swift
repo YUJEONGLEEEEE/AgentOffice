@@ -40,7 +40,7 @@ struct AgentSnapshotTests {
     }
 
     @Test func teamMemberSnapshotAddsOnlyItsRole() throws {
-        let snapshot = AgentSnapshot(id: "s1.a1", name: "리서처 · s1", floor: "AgentOffice", room: .researchRoom,
+        let snapshot = AgentSnapshot(id: "s1.a1", name: "s1", floor: "AgentOffice", room: .researchRoom,
                                      status: .working, lastActivity: start, role: "market-researcher")
         let data = try JSONEncoder().encode(snapshot)
         let keys = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any]).keys

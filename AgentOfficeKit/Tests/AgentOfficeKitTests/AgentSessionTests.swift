@@ -129,7 +129,7 @@ struct AgentSessionTests {
         let member = try #require(session.teamMembers["a1"])
         #expect(member.room == .meetingRoom)
         #expect(member.status == .arrived)
-        #expect(member.role.title == "iOS 개발자")
+        #expect(member.role.title != "ios-developer")
         #expect(member.role.department == .development)
 
         session.apply(event(.preToolUse, after: 2, tool: "Edit", agentID: "a1", agentType: "ios-developer"))
@@ -163,7 +163,8 @@ struct AgentSessionTests {
         ]))
 
         let snapshots = session.snapshots(at: start.addingTimeInterval(2))
-        #expect(snapshots.map(\.name) == ["s1", "QA 검토자 · s1"])
+        #expect(snapshots.map(\.name) == ["s1", "s1"])
+        #expect(snapshots.last?.displayName == "\(TeamRole(agentType: "qa-reviewer").title) · s1")
         #expect(snapshots.last?.role == "qa-reviewer")
         #expect(snapshots.last?.id == "s1.a1")
 

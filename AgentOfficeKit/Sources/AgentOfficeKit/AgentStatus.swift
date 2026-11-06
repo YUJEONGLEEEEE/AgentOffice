@@ -1,3 +1,5 @@
+import Foundation
+
 /// What an agent is doing right now.
 public enum AgentStatus: String, CaseIterable, Codable, Sendable {
     /// The session just started.
@@ -17,13 +19,13 @@ public enum AgentStatus: String, CaseIterable, Codable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .arrived: "출근함"
-        case .received: "일 받음"
-        case .working: "일하는 중"
-        case .waiting: "기다리는 중"
-        case .resting: "쉬는 중"
-        case .left: "퇴근"
-        case .idle: "대기 중"
+        case .arrived: String(localized: "Arrived", bundle: .module)
+        case .received: String(localized: "Got work", bundle: .module)
+        case .working: String(localized: "Working", bundle: .module)
+        case .waiting: String(localized: "Waiting", bundle: .module)
+        case .resting: String(localized: "Resting", bundle: .module)
+        case .left: String(localized: "Left", bundle: .module)
+        case .idle: String(localized: "Idle", bundle: .module)
         }
     }
 }

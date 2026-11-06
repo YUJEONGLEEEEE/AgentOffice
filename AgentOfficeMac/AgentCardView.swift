@@ -76,23 +76,23 @@ final class AgentCardView: NSView {
             agentID = snapshot.id
             portrait.layer?.contents = AgentPortrait.image(forAgentID: snapshot.id, role: snapshot.role)
         }
-        nameLabel.stringValue = snapshot.name
+        nameLabel.stringValue = snapshot.displayName
         tagLabel.stringValue = snapshot.status.displayName
         tagLabel.textColor = NSColor(hex: snapshot.status.tagTextColor)
         tagBackground.layer?.backgroundColor = NSColor(hex: snapshot.status.tagColor).cgColor
 
-        var details = [snapshot.status == .left ? "사무실 밖" : snapshot.room.displayName, lastActivityText]
+        var details = [snapshot.status == .left ? OfficeText.outOfOffice : snapshot.room.displayName, lastActivityText]
         if let floorName {
             details.insert(floorName, at: 0)
         }
         if helpers > 0 {
-            details.append("팀원 \(helpers)명")
+            details.append(String(localized: "\(helpers) team members"))
         }
         detailLabel.stringValue = details.joined(separator: " · ")
         portrait.alphaValue = snapshot.status == .left ? 0.4 : 1
         setAccessibilityElement(true)
         setAccessibilityRole(.group)
-        setAccessibilityLabel("\(snapshot.name), \(snapshot.status.displayName), \(detailLabel.stringValue)")
+        setAccessibilityLabel("\(snapshot.displayName), \(snapshot.status.displayName), \(detailLabel.stringValue)")
         updateColors()
     }
 
