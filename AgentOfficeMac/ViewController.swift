@@ -37,6 +37,11 @@ class ViewController: NSViewController {
     private let floorTable = NSTableView()
     private let officeView = SKView()
     private let officeScene = OfficeScene(layout: .standard)
+    private let buildingScene = BuildingScene()
+    /// 2D shows the floor plan; 3D shows the building, and a floor opens when picked.
+    private(set) var viewStyle = OfficeViewStyle.saved()
+    private let styleSwitch = NSSegmentedControl(labels: OfficeViewStyle.allCases.map(\.title), trackingMode: .selectOne, target: nil, action: nil)
+    private let backToBuildingButton = NSButton(title: String(localized: "← Building"), target: nil, action: nil)
     private let activityTable = NSTableView()
     private let cardStack = NSStackView()
     private var cardViews: [String: AgentCardView] = [:]
@@ -76,6 +81,7 @@ class ViewController: NSViewController {
         super.viewDidAppear()
         guard let window = view.window else { return }
         window.title = "AgentOffice"
+        window.acceptsMouseMovedEvents = true
         window.minSize = NSSize(width: 1100, height: 600)
         if window.frame.width < 1100 {
             let visible = window.screen?.visibleFrame.size ?? NSSize(width: 1400, height: 800)
@@ -94,6 +100,15 @@ class ViewController: NSViewController {
         chooseFolderButton.target = self
         chooseFolderButton.action = #selector(chooseEventsFolder(_:))
         chooseFolderButton.bezelStyle = .push
+
+        styleSwitch.target = self
+        styleSwitch.action = #selector(styleSwitchChanged(_:))
+        styleSwitch.setAccessibilityLabel(String(localized: "View style"))
+        for (index, style) in OfficeViewStyle.allCases.enumerated() {
+            styleSwitch.setToolTip(style.accessibilityLabel, forSegment: index)
+            styleSwitch.setWidth(44, forSegment: index)
+        }
+        styleSwitch.selectedSegment = OfficeViewStyle.allCases.firstIndex(of: viewStyle) ?? 0
 
         syncLabel.textColor = .secondaryLabelColor
         syncLabel.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
@@ -183,6 +198,42 @@ class ViewController: NSViewController {
     private func setUpOffice() {
         officeView.ignoresSiblingOrder = true
         officeView.presentScene(officeScene)
+        // The building highlights the floor under the pointer.
+        officeView.addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect],
+                                                  owner: officeView, userInfo: nil))
+        buildingScene.onSelectFloor = { [weak self] floor in
+            self?.chosenFloor = floor
+            self?.updateFloor(now: .now)
+        }
+
+        backToBuildingButton.bezelStyle = .push
+        backToBuildingButton.target = self
+        backToBuildingButton.action = #selector(backToBuilding(_:))
+        backToBuildingButton.isHidden = true
+    }
+
+    // MARK: - View style
+
+    @objc private func styleSwitchChanged(_ sender: NSSegmentedControl) {
+        guard OfficeViewStyle.allCases.indices.contains(sender.selectedSegment) else { return }
+        show(style: OfficeViewStyle.allCases[sender.selectedSegment])
+    }
+
+    /// View > 2D (⌘1) and View > 3D (⌘2), and the switch in the header.
+    func show(style: OfficeViewStyle) {
+        viewStyle = style
+        style.save()
+        styleSwitch.selectedSegment = OfficeViewStyle.allCases.firstIndex(of: style) ?? 0
+        // The building opens on the whole building, not on the last floor.
+        if style == .building {
+            chosenFloor = nil
+        }
+        updateFloor(now: .now)
+    }
+
+    @objc private func backToBuilding(_ sender: Any?) {
+        chosenFloor = nil
+        updateFloor(now: .now)
     }
 
     private func setUpEmptyState() {
@@ -197,7 +248,7 @@ class ViewController: NSViewController {
     private func layOut(floorPanel: NSView, activityPanel: NSView, cardScroll: NSScrollView) {
         let spacer = NSView()
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        let header = NSStackView(views: [folderLabel, chooseFolderButton, spacer, syncLabel])
+        let header = NSStackView(views: [folderLabel, chooseFolderButton, spacer, styleSwitch, syncLabel])
         header.orientation = .horizontal
         header.spacing = 12
 
@@ -205,7 +256,7 @@ class ViewController: NSViewController {
         let officeArea = NSLayoutGuide()
         view.addLayoutGuide(officeArea)
 
-        for subview in [header, floorPanel, officeView, activityPanel, cardScroll, emptyStateLabel] {
+        for subview in [header, floorPanel, officeView, activityPanel, cardScroll, emptyStateLabel, backToBuildingButton] {
             subview.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(subview)
         }
@@ -253,6 +304,9 @@ class ViewController: NSViewController {
             cardScroll.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             cardScroll.heightAnchor.constraint(equalToConstant: AgentCardView.size.height + 18),
             cardScroll.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -12),
+
+            backToBuildingButton.topAnchor.constraint(equalTo: officeView.topAnchor, constant: 10),
+            backToBuildingButton.leadingAnchor.constraint(equalTo: officeView.leadingAnchor, constant: 10),
 
             emptyStateLabel.centerXAnchor.constraint(equalTo: officeView.centerXAnchor),
             emptyStateLabel.centerYAnchor.constraint(equalTo: officeView.centerYAnchor),
@@ -321,8 +375,16 @@ class ViewController: NSViewController {
 
         // The team is always in the office; members with work on this floor show that work.
         let agents = OfficeTeam.arrange(floor.map { name in snapshots.filter { $0.floor == name } } ?? snapshots)
-        // In the whole office, name plates also say which project each agent works on.
-        officeScene.show(agents: floor == nil ? agents.map(Self.withProjectName) : agents)
+        let showsBuilding = viewStyle == .building && floor == nil
+        if showsBuilding {
+            present(buildingScene)
+            buildingScene.show(agents: snapshots)
+        } else {
+            present(officeScene)
+            // In the whole office, name plates also say which project each agent works on.
+            officeScene.show(agents: floor == nil ? agents.map(Self.withProjectName) : agents)
+        }
+        backToBuildingButton.isHidden = !(viewStyle == .building && floor != nil)
         floorActivity = floor.map { name in office.activity.filter { $0.floor == name } } ?? office.activity
         view.window?.subtitle = floor ?? OfficeText.allFloors
 
@@ -330,6 +392,12 @@ class ViewController: NSViewController {
         activityTable.reloadData()
         updateCards(agents: agents, now: now)
         updateEmptyState()
+    }
+
+    private func present(_ scene: SKScene) {
+        if officeView.scene !== scene {
+            officeView.presentScene(scene)
+        }
     }
 
     private func reloadFloorTable() {

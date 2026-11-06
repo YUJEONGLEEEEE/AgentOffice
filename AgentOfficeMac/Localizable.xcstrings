@@ -289,6 +289,16 @@
         }
       }
     },
+    "View style" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보기 방식"
+          }
+        }
+      }
+    },
     "Window" : {
       "localizations" : {
         "ko" : {
@@ -315,6 +325,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iCloud 동기화 실패 · 잠시 후 다시 시도해요"
+          }
+        }
+      }
+    },
+    "← Building" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "← 건물"
           }
         }
       }
