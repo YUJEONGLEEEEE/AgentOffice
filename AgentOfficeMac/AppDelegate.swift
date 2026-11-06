@@ -10,21 +10,23 @@ import Cocoa
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-    
-
-
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // Insert code here to initialize your application
-    }
-
-    func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        NSApp.mainMenu = MainMenu.make()
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
-        return true
+        true
     }
 
+    /// The app has a single window, so closing it quits, like System Settings.
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        true
+    }
 
+    /// File > Choose Events Folder… (⌘O), passed on to the office window.
+    @objc func chooseEventsFolder(_ sender: Any?) {
+        let window = NSApp.keyWindow ?? NSApp.mainWindow ?? NSApp.windows.first { $0.contentViewController is ViewController }
+        guard let office = window?.contentViewController as? ViewController else { return }
+        office.chooseEventsFolder(sender)
+    }
 }
-
