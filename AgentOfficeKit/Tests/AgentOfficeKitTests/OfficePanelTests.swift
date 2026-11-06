@@ -52,7 +52,8 @@ struct ActivityEntryTests {
 
         #expect(entries.map(\.status) == [.arrived, .received, .working, .working, .resting])
         #expect(entries.map(\.room) == [.desk, .desk, .serverRoom, .archive, .breakRoom])
-        #expect(entries.map(\.summary).last == "탕비실에서 커피 마시는 중")
+        #expect(entries.map(\.summary).last == ActivityEntry(id: "x", time: start, agentID: "eebe", agentName: "eebe",
+                                                             floor: "AgentOffice", room: .breakRoom, status: .resting).summary)
         #expect(Set(entries.map(\.id)).count == entries.count)
     }
 
@@ -77,14 +78,15 @@ struct ActivityEntryTests {
         let memberEntries = AgentSession.activity(from: list).filter { $0.agentID == "eebe4d02.a1" }
         #expect(memberEntries.map(\.status) == [.arrived, .working, .left])
         #expect(memberEntries.map(\.room) == [.meetingRoom, .archive, .archive])
-        #expect(memberEntries.first?.agentName == "리서처 · eebe")
+        #expect(memberEntries.first?.agentName == "\(TeamRole(agentType: "market-researcher").title) · eebe")
     }
 
     @Test func summarySaysWhereTheAgentWorks() {
         let entry = ActivityEntry(id: "x", time: start, agentID: "eebe", agentName: "eebe", floor: "AgentOffice",
                                   room: .serverRoom, status: .working)
 
-        #expect(entry.summary == "서버실에서 일하는 중")
+        #expect(entry.summary.contains(Room.serverRoom.displayName))
+        #expect(entry.summary != AgentStatus.working.displayName)
     }
 }
 

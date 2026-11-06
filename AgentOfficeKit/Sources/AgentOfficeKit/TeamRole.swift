@@ -1,3 +1,5 @@
+import Foundation
+
 /// The departments of the office team. Each department has its own uniform color.
 public enum Department: String, CaseIterable, Sendable {
     case strategy
@@ -11,13 +13,13 @@ public enum Department: String, CaseIterable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .strategy: "전략기획팀"
-        case .research: "리서치팀"
-        case .design: "디자인팀"
-        case .development: "개발팀"
-        case .quality: "품질관리팀"
-        case .relations: "대외협력팀"
-        case .support: "지원팀"
+        case .strategy: String(localized: "Strategy Team", bundle: .module)
+        case .research: String(localized: "Research Team", bundle: .module)
+        case .design: String(localized: "Design Team", bundle: .module)
+        case .development: String(localized: "Development Team", bundle: .module)
+        case .quality: String(localized: "Quality Team", bundle: .module)
+        case .relations: String(localized: "Relations Team", bundle: .module)
+        case .support: String(localized: "Support Team", bundle: .module)
         }
     }
 
@@ -38,26 +40,26 @@ public enum Department: String, CaseIterable, Sendable {
 /// The job of a team member (a subagent), read from its agent type, which is the `name` in its agent file.
 public struct TeamRole: Equatable, Sendable {
     public let agentType: String
-    /// A short job title for name plates, for example "리서처".
+    /// A short job title for name plates, for example "Researcher".
     public let title: String
     public let department: Department
 
     public init(agentType: String) {
         self.agentType = agentType
         switch agentType {
-        case "contest-analyst": (title, department) = ("공고 분석가", .strategy)
-        case "service-planner": (title, department) = ("기획자", .strategy)
-        case "market-researcher": (title, department) = ("리서처", .research)
-        case "data-analyst": (title, department) = ("데이터 분석가", .research)
-        case "ui-designer": (title, department) = ("디자이너", .design)
-        case "ios-developer": (title, department) = ("iOS 개발자", .development)
-        case "web-developer": (title, department) = ("웹 개발자", .development)
-        case "qa-reviewer": (title, department) = ("QA 검토자", .quality)
-        case "pitch-writer": (title, department) = ("발표 담당", .relations)
-        case "Explore": (title, department) = ("탐색 담당", .support)
-        case "Plan": (title, department) = ("설계 담당", .support)
-        case "general-purpose": (title, department) = ("지원 담당", .support)
-        case "claude-code-guide": (title, department) = ("안내 담당", .support)
+        case "contest-analyst": (title, department) = (String(localized: "Contest Analyst", bundle: .module), .strategy)
+        case "service-planner": (title, department) = (String(localized: "Planner", bundle: .module), .strategy)
+        case "market-researcher": (title, department) = (String(localized: "Researcher", bundle: .module), .research)
+        case "data-analyst": (title, department) = (String(localized: "Data Analyst", bundle: .module), .research)
+        case "ui-designer": (title, department) = (String(localized: "Designer", bundle: .module), .design)
+        case "ios-developer": (title, department) = (String(localized: "iOS Developer", bundle: .module), .development)
+        case "web-developer": (title, department) = (String(localized: "Web Developer", bundle: .module), .development)
+        case "qa-reviewer": (title, department) = (String(localized: "QA Reviewer", bundle: .module), .quality)
+        case "pitch-writer": (title, department) = (String(localized: "Pitch Writer", bundle: .module), .relations)
+        case "Explore": (title, department) = (String(localized: "Explorer", bundle: .module), .support)
+        case "Plan": (title, department) = (String(localized: "Architect", bundle: .module), .support)
+        case "general-purpose": (title, department) = (String(localized: "Assistant", bundle: .module), .support)
+        case "claude-code-guide": (title, department) = (String(localized: "Guide", bundle: .module), .support)
         default: (title, department) = (agentType, .support)
         }
     }

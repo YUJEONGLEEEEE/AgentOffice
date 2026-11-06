@@ -1,0 +1,506 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld at work" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld명 근무 중"
+          }
+        }
+      }
+    },
+    "All" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전체"
+          }
+        }
+      }
+    },
+    "Architect" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설계 담당"
+          }
+        }
+      }
+    },
+    "Archive" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자료실"
+          }
+        }
+      }
+    },
+    "Arrived" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "출근함"
+          }
+        }
+      }
+    },
+    "Arrived at work" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "출근했어요"
+          }
+        }
+      }
+    },
+    "Assistant" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지원 담당"
+          }
+        }
+      }
+    },
+    "Back at their desk" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자리로 돌아왔어요"
+          }
+        }
+      }
+    },
+    "Break Room" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탕비실"
+          }
+        }
+      }
+    },
+    "Contest Analyst" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공고 분석가"
+          }
+        }
+      }
+    },
+    "Data Analyst" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데이터 분석가"
+          }
+        }
+      }
+    },
+    "Design Team" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "디자인팀"
+          }
+        }
+      }
+    },
+    "Designer" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "디자이너"
+          }
+        }
+      }
+    },
+    "Desk" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자기 자리"
+          }
+        }
+      }
+    },
+    "Dev Room" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개발실"
+          }
+        }
+      }
+    },
+    "Development Team" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개발팀"
+          }
+        }
+      }
+    },
+    "Empty" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "비어 있음"
+          }
+        }
+      }
+    },
+    "Explorer" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탐색 담당"
+          }
+        }
+      }
+    },
+    "Got new work" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새 일을 받았어요"
+          }
+        }
+      }
+    },
+    "Got work" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일 받음"
+          }
+        }
+      }
+    },
+    "Guide" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "안내 담당"
+          }
+        }
+      }
+    },
+    "Having coffee in the break room" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탕비실에서 커피 마시는 중"
+          }
+        }
+      }
+    },
+    "Idle" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "대기 중"
+          }
+        }
+      }
+    },
+    "Left" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "퇴근"
+          }
+        }
+      }
+    },
+    "Meeting Room" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "회의실"
+          }
+        }
+      }
+    },
+    "Office" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사무실"
+          }
+        }
+      }
+    },
+    "Out of office" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사무실 밖"
+          }
+        }
+      }
+    },
+    "Pitch Writer" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "발표 담당"
+          }
+        }
+      }
+    },
+    "Planner" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기획자"
+          }
+        }
+      }
+    },
+    "QA Reviewer" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QA 검토자"
+          }
+        }
+      }
+    },
+    "Quality Team" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "품질관리팀"
+          }
+        }
+      }
+    },
+    "Relations Team" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "대외협력팀"
+          }
+        }
+      }
+    },
+    "Research Room" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "정보검색실"
+          }
+        }
+      }
+    },
+    "Research Team" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "리서치팀"
+          }
+        }
+      }
+    },
+    "Researcher" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "리서처"
+          }
+        }
+      }
+    },
+    "Resting" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "쉬는 중"
+          }
+        }
+      }
+    },
+    "Resting · Coffee" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "쉬는 중 · 커피"
+          }
+        }
+      }
+    },
+    "Server Room" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서버실"
+          }
+        }
+      }
+    },
+    "Strategy Team" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전략기획팀"
+          }
+        }
+      }
+    },
+    "Support Team" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지원팀"
+          }
+        }
+      }
+    },
+    "Taking a break" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "쉬는 중"
+          }
+        }
+      }
+    },
+    "Waiting" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기다리는 중"
+          }
+        }
+      }
+    },
+    "Waiting for approval" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "허락을 기다리는 중"
+          }
+        }
+      }
+    },
+    "Web Developer" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "웹 개발자"
+          }
+        }
+      }
+    },
+    "Went home" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "퇴근했어요"
+          }
+        }
+      }
+    },
+    "Working" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일하는 중"
+          }
+        }
+      }
+    },
+    "Working in %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@에서 일하는 중"
+          }
+        }
+      }
+    },
+    "Workspace" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업무 공간"
+          }
+        }
+      }
+    },
+    "iOS Developer" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS 개발자"
+          }
+        }
+      }
+    },
+    "just now" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "방금"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

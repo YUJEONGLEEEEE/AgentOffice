@@ -49,7 +49,7 @@ public enum OfficeTeam {
                 result += jobs.dropFirst()
             } else {
                 result.append(AgentSnapshot(
-                    id: residentID(for: role.agentType), name: role.title, floor: "",
+                    id: residentID(for: role.agentType), name: "", floor: "",
                     room: OfficeLayout.standard.seat(forAgentType: role.agentType)?.room ?? .desk,
                     status: .idle, lastActivity: .distantPast, role: role.agentType
                 ))

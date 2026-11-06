@@ -169,13 +169,13 @@ public final class OfficeScene: SKScene {
 
     private func signText(for room: Room) -> (title: String, subtitle: String) {
         switch room {
-        case .meetingRoom: ("회의실", "PLAN · TODO · AGENT")
-        case .archive: ("자료실", "READ · GREP · GLOB")
-        case .researchRoom: ("정보검색실", "WEB SEARCH · FETCH")
-        case .devRoom: ("개발실", "EDIT · WRITE")
-        case .desk: ("업무 공간", "MY DESK · NEW TASK")
-        case .serverRoom: ("서버실", "BASH · GIT")
-        case .breakRoom: ("탕비실", "BREAK · COFFEE")
+        case .meetingRoom: (room.displayName, "PLAN · TODO · AGENT")
+        case .archive: (room.displayName, "READ · GREP · GLOB")
+        case .researchRoom: (room.displayName, "WEB SEARCH · FETCH")
+        case .devRoom: (room.displayName, "EDIT · WRITE")
+        case .desk: (String(localized: "Workspace", bundle: .module), "MY DESK · NEW TASK")
+        case .serverRoom: (room.displayName, "BASH · GIT")
+        case .breakRoom: (room.displayName, "BREAK · COFFEE")
         }
     }
 

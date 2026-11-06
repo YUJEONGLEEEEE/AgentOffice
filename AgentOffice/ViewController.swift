@@ -39,7 +39,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "전체"
+        title = OfficeText.allFloors
         view.backgroundColor = .systemGroupedBackground
         setUpViews()
         updateFloorMenu()
@@ -68,7 +68,7 @@ class ViewController: UIViewController {
         officeView.clipsToBounds = true
         officeView.presentScene(officeScene)
         officeView.isAccessibilityElement = true
-        officeView.accessibilityLabel = "사무실"
+        officeView.accessibilityLabel = OfficeText.office
 
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "agent")
@@ -81,7 +81,7 @@ class ViewController: UIViewController {
         messageLabel.textColor = .secondaryLabel
         messageLabel.textAlignment = .center
         messageLabel.numberOfLines = 0
-        messageLabel.text = "불러오는 중…"
+        messageLabel.text = String(localized: "Loading…")
 
         for subview in [statusLabel, officeView, tableView, messageLabel] {
             subview.translatesAutoresizingMaskIntoConstraints = false
@@ -112,20 +112,20 @@ class ViewController: UIViewController {
         ])
     }
 
-    /// The floor menu: "전체" and one item per project, with a check on the one shown.
+    /// The floor menu: "All" and one item per project, with a check on the one shown.
     private func updateFloorMenu() {
         let floors = FloorSummary.floors(from: agents)
-        let all = UIAction(title: "전체", state: chosenFloor == nil ? .on : .off) { [weak self] _ in
+        let all = UIAction(title: OfficeText.allFloors, state: chosenFloor == nil ? .on : .off) { [weak self] _ in
             self?.choose(floor: nil)
         }
         let floorActions = floors.map { floor in
-            UIAction(title: floor.name, subtitle: floor.presentCount > 0 ? "\(floor.presentCount)명 근무 중" : "비어 있음",
+            UIAction(title: floor.name, subtitle: floor.presentCount > 0 ? OfficeText.atWork(floor.presentCount) : OfficeText.emptyFloor,
                      state: chosenFloor == floor.name ? .on : .off) { [weak self] _ in
                 self?.choose(floor: floor.name)
             }
         }
-        let menu = UIMenu(title: "층", children: [all, UIMenu(options: .displayInline, children: floorActions)])
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "층", image: UIImage(systemName: "building.2"), menu: menu)
+        let menu = UIMenu(title: String(localized: "Floors"), children: [all, UIMenu(options: .displayInline, children: floorActions)])
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: String(localized: "Floors"), image: UIImage(systemName: "building.2"), menu: menu)
     }
 
     private func choose(floor: String?) {
@@ -166,11 +166,11 @@ class ViewController: UIViewController {
                 let office = try await cloud.fetch()
                 agents = office.agents
                 lastUpdated = office.lastUpdated
-                messageLabel.text = agents.isEmpty ? "아직 직원 정보가 없어요.\nMac에서 AgentOffice를 켜 주세요." : nil
+                messageLabel.text = agents.isEmpty ? String(localized: "No one is in the office yet.\nOpen AgentOffice on your Mac.") : nil
             } catch OfficeCloud.CloudError.accountUnavailable {
-                messageLabel.text = "설정에서 iCloud에 로그인하면\nMac의 사무실을 볼 수 있어요."
+                messageLabel.text = String(localized: "Sign in to iCloud in Settings\nto see the office on your Mac.")
             } catch {
-                messageLabel.text = agents.isEmpty ? "사무실 정보를 불러오지 못했어요.\n잠시 후 다시 시도해요." : nil
+                messageLabel.text = agents.isEmpty ? String(localized: "Couldn’t load the office.\nTrying again soon.") : nil
             }
             isLoading = false
             tableView.refreshControl?.endRefreshing()
@@ -188,7 +188,7 @@ class ViewController: UIViewController {
             officeScene.removeAllAgents()
             shownFloor = floor
         }
-        title = floor ?? "전체"
+        title = floor ?? OfficeText.allFloors
 
         // Apply the one-hour rule here too, in case the Mac stopped sending updates.
         let current = agents.map { agent in
@@ -212,12 +212,12 @@ class ViewController: UIViewController {
             statusLabel.text = nil
             return
         }
-        let updatedText = now.timeIntervalSince(lastUpdated) < 30 ? "방금" : relativeFormatter.localizedString(for: lastUpdated, relativeTo: now)
+        let updatedText = now.timeIntervalSince(lastUpdated) < 30 ? OfficeText.justNow : relativeFormatter.localizedString(for: lastUpdated, relativeTo: now)
         if now.timeIntervalSince(lastUpdated) > Self.offlineAfter {
-            statusLabel.text = "Mac 오프라인 · 마지막 업데이트 \(updatedText)"
+            statusLabel.text = String(localized: "Mac offline · Last updated \(updatedText)")
             statusLabel.textColor = .systemOrange
         } else {
-            statusLabel.text = "\(working)명 근무 중 · \(updatedText) 업데이트"
+            statusLabel.text = String(localized: "\(working) at work · Updated \(updatedText)")
             statusLabel.textColor = .secondaryLabel
         }
     }
@@ -232,7 +232,7 @@ extension ViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        shownAgents.isEmpty ? nil : "직원"
+        shownAgents.isEmpty ? nil : String(localized: "Staff")
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -240,8 +240,8 @@ extension ViewController: UITableViewDataSource {
         let agent = shownAgents[indexPath.row]
 
         var content = UIListContentConfiguration.subtitleCell()
-        content.text = agent.name
-        var details = [agent.status.displayName, agent.status == .left ? "사무실 밖" : agent.room.displayName]
+        content.text = agent.displayName
+        var details = [agent.status.displayName, agent.status == .left ? OfficeText.outOfOffice : agent.room.displayName]
         if shownFloor == nil && !agent.floor.isEmpty {
             details.append(agent.floor)
         }

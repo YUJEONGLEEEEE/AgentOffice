@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "AgentOfficeKit",
+    defaultLocalization: "en",
     platforms: [
         .iOS(.v26),
         .macOS(.v26)
@@ -16,7 +17,8 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "AgentOfficeKit"
+            name: "AgentOfficeKit",
+            resources: [.process("Localizable.xcstrings")]
         ),
         .testTarget(
             name: "AgentOfficeKitTests",

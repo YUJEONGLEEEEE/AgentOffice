@@ -8,7 +8,7 @@ struct OfficeCloudTests {
     private let now = Date(timeIntervalSince1970: 1_793_862_600)
 
     private func agent(role: String? = "market-researcher") -> AgentSnapshot {
-        AgentSnapshot(id: "eebe4d02.a1", name: "리서처 · eebe", floor: "AgentOffice", room: .researchRoom,
+        AgentSnapshot(id: "eebe4d02.a1", name: "eebe", floor: "AgentOffice", room: .researchRoom,
                       status: .working, lastActivity: now, role: role)
     }
 

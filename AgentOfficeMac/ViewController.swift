@@ -26,13 +26,13 @@ class ViewController: NSViewController {
     /// The floor the user picked. `nil` shows the whole office with every project's agents.
     private var chosenFloor: String?
     private var shownFloor: String?
-    /// The first row of the floor list is "전체" (every floor); the floors follow.
+    /// The first row of the floor list is "All" (every floor); the floors follow.
     private static let allFloorsRow = 0
     private var isUpdatingFloorSelection = false
     private var refreshTimer: Timer?
 
     private let folderLabel = NSTextField(labelWithString: "")
-    private let chooseFolderButton = NSButton(title: "기록 폴더 선택…", target: nil, action: nil)
+    private let chooseFolderButton = NSButton(title: String(localized: "Choose Events Folder…"), target: nil, action: nil)
     private let syncLabel = NSTextField(labelWithString: "")
     private let floorTable = NSTableView()
     private let officeView = SKView()
@@ -107,11 +107,11 @@ class ViewController: NSViewController {
         case .starting:
             syncLabel.stringValue = ""
         case .syncing:
-            syncLabel.stringValue = "iPhone과 동기화 중"
+            syncLabel.stringValue = String(localized: "Syncing with iPhone")
         case .accountUnavailable:
-            syncLabel.stringValue = "iCloud에 로그인하면 iPhone에서도 볼 수 있어요"
+            syncLabel.stringValue = String(localized: "Sign in to iCloud to see the office on iPhone too")
         case .failed:
-            syncLabel.stringValue = "iCloud 동기화 실패 · 잠시 후 다시 시도해요"
+            syncLabel.stringValue = String(localized: "iCloud sync failed · Trying again soon")
         }
     }
 
@@ -123,8 +123,9 @@ class ViewController: NSViewController {
         floorTable.rowHeight = 40
         floorTable.dataSource = self
         floorTable.delegate = self
-        floorTable.setAccessibilityLabel("층")
-        return makePanel(title: "층", table: floorTable)
+        let floorsTitle = String(localized: "Floors")
+        floorTable.setAccessibilityLabel(floorsTitle)
+        return makePanel(title: floorsTitle, table: floorTable)
     }
 
     private func makeActivityPanel() -> NSView {
@@ -136,8 +137,9 @@ class ViewController: NSViewController {
         activityTable.selectionHighlightStyle = .none
         activityTable.dataSource = self
         activityTable.delegate = self
-        activityTable.setAccessibilityLabel("활동 기록")
-        return makePanel(title: "활동 기록", table: activityTable)
+        let activityTitle = String(localized: "Activity")
+        activityTable.setAccessibilityLabel(activityTitle)
+        return makePanel(title: activityTitle, table: activityTable)
     }
 
     private func makePanel(title: String, table: NSTableView) -> NSView {
@@ -168,7 +170,7 @@ class ViewController: NSViewController {
         scrollView.hasHorizontalScroller = true
         scrollView.autohidesScrollers = true
         scrollView.drawsBackground = false
-        scrollView.setAccessibilityLabel("직원 카드")
+        scrollView.setAccessibilityLabel(String(localized: "Staff cards"))
 
         NSLayoutConstraint.activate([
             cardStack.topAnchor.constraint(equalTo: scrollView.contentView.topAnchor),
@@ -271,13 +273,13 @@ class ViewController: NSViewController {
 
     private func updateFolderUI() {
         if let url = folderAccess.folderURL {
-            folderLabel.stringValue = "기록 폴더: \(url.lastPathComponent)"
+            folderLabel.stringValue = String(localized: "Events folder: \(url.lastPathComponent)")
             folderLabel.toolTip = url.path(percentEncoded: false)
-            chooseFolderButton.title = "폴더 바꾸기…"
+            chooseFolderButton.title = String(localized: "Change Folder…")
         } else {
-            folderLabel.stringValue = "기록 폴더를 선택하면 사무실 현황이 보여요."
+            folderLabel.stringValue = String(localized: "Choose the events folder to see the office.")
             folderLabel.toolTip = nil
-            chooseFolderButton.title = "기록 폴더 선택…"
+            chooseFolderButton.title = String(localized: "Choose Events Folder…")
         }
         updateEmptyState()
     }
@@ -321,7 +323,7 @@ class ViewController: NSViewController {
         // In the whole office, name plates also say which project each agent works on.
         officeScene.show(agents: floor == nil ? agents.map(Self.withProjectName) : agents)
         floorActivity = floor.map { name in office.activity.filter { $0.floor == name } } ?? office.activity
-        view.window?.subtitle = floor.map { "\($0) 층" } ?? "전체"
+        view.window?.subtitle = floor ?? OfficeText.allFloors
 
         reloadFloorTable()
         activityTable.reloadData()
@@ -349,7 +351,7 @@ class ViewController: NSViewController {
                 with: agent,
                 helpers: sessionsByID[agent.id]?.activeSubagentIDs.count ?? 0,
                 floorName: shownFloor == nil && !agent.floor.isEmpty ? agent.floor : nil,
-                lastActivityText: agent.status == .idle ? "자기 자리" : lastActivityText(for: agent.lastActivity, now: now)
+                lastActivityText: agent.status == .idle ? String(localized: "At their desk") : lastActivityText(for: agent.lastActivity, now: now)
             )
             cards.append(card)
         }
@@ -363,10 +365,10 @@ class ViewController: NSViewController {
 
     private func updateEmptyState() {
         if folderAccess.folderURL == nil {
-            emptyStateLabel.stringValue = "  기록 폴더를 아직 선택하지 않았어요  "
+            emptyStateLabel.stringValue = "  " + String(localized: "No events folder chosen yet") + "  "
             emptyStateLabel.isHidden = false
         } else {
-            emptyStateLabel.stringValue = "  아직 출근한 직원이 없어요  "
+            emptyStateLabel.stringValue = "  " + String(localized: "No one has arrived yet") + "  "
             emptyStateLabel.isHidden = !snapshots.isEmpty
         }
     }
@@ -382,7 +384,7 @@ class ViewController: NSViewController {
 
     private func lastActivityText(for date: Date, now: Date) -> String {
         if now.timeIntervalSince(date) < 10 {
-            return "방금"
+            return OfficeText.justNow
         }
         return relativeFormatter.localizedString(for: date, relativeTo: now)
     }
@@ -401,10 +403,10 @@ extension ViewController: NSTableViewDataSource, NSTableViewDelegate {
 
         if tableView === floorTable {
             let isAll = row == Self.allFloorsRow
-            let name = isAll ? "전체" : floors[row - 1].name
+            let name = isAll ? OfficeText.allFloors : floors[row - 1].name
             let count = isAll ? floors.reduce(0) { $0 + $1.presentCount } : floors[row - 1].presentCount
             cell.titleField.stringValue = name
-            cell.subtitleField.stringValue = count > 0 ? "\(count)명 근무 중" : "비어 있음"
+            cell.subtitleField.stringValue = count > 0 ? OfficeText.atWork(count) : OfficeText.emptyFloor
         } else {
             let entry = floorActivity[row]
             var parts = [entry.agentName, timeFormatter.string(from: entry.time)]

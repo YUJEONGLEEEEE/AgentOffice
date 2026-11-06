@@ -1,0 +1,184 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld team members" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "팀원 %lld명"
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld team member"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld team members"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Activity" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "활동 기록"
+          }
+        }
+      }
+    },
+    "At their desk" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자기 자리"
+          }
+        }
+      }
+    },
+    "Change Folder…" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "폴더 바꾸기…"
+          }
+        }
+      }
+    },
+    "Choose" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택"
+          }
+        }
+      }
+    },
+    "Choose Events Folder…" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록 폴더 선택…"
+          }
+        }
+      }
+    },
+    "Choose the Events folder where Claude Code records its activity." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Code 기록이 쌓이는 Events 폴더를 선택하세요."
+          }
+        }
+      }
+    },
+    "Choose the events folder to see the office." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록 폴더를 선택하면 사무실 현황이 보여요."
+          }
+        }
+      }
+    },
+    "Events folder: %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록 폴더: %@"
+          }
+        }
+      }
+    },
+    "Floors" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "층"
+          }
+        }
+      }
+    },
+    "No events folder chosen yet" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록 폴더를 아직 선택하지 않았어요"
+          }
+        }
+      }
+    },
+    "No one has arrived yet" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 출근한 직원이 없어요"
+          }
+        }
+      }
+    },
+    "Sign in to iCloud to see the office on iPhone too" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud에 로그인하면 iPhone에서도 볼 수 있어요"
+          }
+        }
+      }
+    },
+    "Staff cards" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "직원 카드"
+          }
+        }
+      }
+    },
+    "Syncing with iPhone" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone과 동기화 중"
+          }
+        }
+      }
+    },
+    "iCloud sync failed · Trying again soon" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud 동기화 실패 · 잠시 후 다시 시도해요"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

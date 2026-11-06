@@ -1,0 +1,86 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld at work · Updated %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld명 근무 중 · %@ 업데이트"
+          }
+        }
+      }
+    },
+    "Couldn’t load the office.\nTrying again soon." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사무실 정보를 불러오지 못했어요.\n잠시 후 다시 시도해요."
+          }
+        }
+      }
+    },
+    "Floors" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "층"
+          }
+        }
+      }
+    },
+    "Loading…" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "불러오는 중…"
+          }
+        }
+      }
+    },
+    "Mac offline · Last updated %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mac 오프라인 · 마지막 업데이트 %@"
+          }
+        }
+      }
+    },
+    "No one is in the office yet.\nOpen AgentOffice on your Mac." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 직원 정보가 없어요.\nMac에서 AgentOffice를 켜 주세요."
+          }
+        }
+      }
+    },
+    "Sign in to iCloud in Settings\nto see the office on your Mac." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정에서 iCloud에 로그인하면\nMac의 사무실을 볼 수 있어요."
+          }
+        }
+      }
+    },
+    "Staff" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "직원"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
