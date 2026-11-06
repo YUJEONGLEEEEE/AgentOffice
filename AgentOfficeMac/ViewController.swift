@@ -92,7 +92,7 @@ class ViewController: NSViewController {
         folderLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         chooseFolderButton.target = self
-        chooseFolderButton.action = #selector(chooseFolder)
+        chooseFolderButton.action = #selector(chooseEventsFolder(_:))
         chooseFolderButton.bezelStyle = .push
 
         syncLabel.textColor = .secondaryLabelColor
@@ -261,8 +261,9 @@ class ViewController: NSViewController {
 
     // MARK: - Folder
 
-    @objc private func chooseFolder() {
-        guard let window = view.window else { return }
+    /// The header button and File > Choose Events Folder… (⌘O).
+    @objc func chooseEventsFolder(_ sender: Any?) {
+        guard let window = view.window, window.attachedSheet == nil else { return }
         folderAccess.chooseFolder(for: window) { [weak self] url in
             guard let self, url != nil else { return }
             self.updateFolderUI()
@@ -374,9 +375,10 @@ class ViewController: NSViewController {
     }
 
     /// "eebe · AgentOffice". Long project names are shortened so the name plate stays small.
-    private static func withProjectName(_ agent: AgentSnapshot) -> AgentSnapshot {
+    private nonisolated static func withProjectName(_ agent: AgentSnapshot) -> AgentSnapshot {
         // Team members already carry their leader's name, which is enough to tell teams apart.
-        guard agent.role == nil else { return agent }
+        // The break room is small, so people having coffee keep their short name; the cards say the project.
+        guard agent.role == nil, !(agent.status == .resting && agent.room == .breakRoom) else { return agent }
         let project = agent.floor.count > 12 ? agent.floor.prefix(11) + "…" : Substring(agent.floor)
         return AgentSnapshot(id: agent.id, name: "\(agent.name) · \(project)", floor: agent.floor,
                              room: agent.room, status: agent.status, lastActivity: agent.lastActivity, role: agent.role)

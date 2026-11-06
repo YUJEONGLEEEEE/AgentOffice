@@ -88,6 +88,16 @@ struct ActivityEntryTests {
         #expect(entry.summary.contains(Room.serverRoom.displayName))
         #expect(entry.summary != AgentStatus.working.displayName)
     }
+
+    @Test func summaryAtTheDeskDoesNotNameTheDeskAsARoom() {
+        let atDesk = ActivityEntry(id: "x", time: start, agentID: "eebe", agentName: "eebe", floor: "AgentOffice",
+                                   room: .desk, status: .working)
+        let inArchive = ActivityEntry(id: "y", time: start, agentID: "eebe", agentName: "eebe", floor: "AgentOffice",
+                                      room: .archive, status: .working)
+
+        #expect(atDesk.summary == String(localized: "Working at their desk", bundle: .module))
+        #expect(inArchive.summary == String(localized: "Working in the \(Room.archive.displayName)", bundle: .module))
+    }
 }
 
 struct AgentPortraitTests {

@@ -22,12 +22,14 @@ public struct ActivityEntry: Identifiable, Equatable, Sendable {
         self.status = status
     }
 
-    /// A short sentence for the log, for example "Working in Server Room".
+    /// A short sentence for the log, for example "Working in the Server Room".
     public var summary: String {
         switch status {
         case .arrived: String(localized: "Arrived at work", bundle: .module)
         case .received: String(localized: "Got new work", bundle: .module)
-        case .working: String(localized: "Working in \(room.displayName)", bundle: .module)
+        case .working: room == .desk
+            ? String(localized: "Working at their desk", bundle: .module)
+            : String(localized: "Working in the \(room.displayName)", bundle: .module)
         case .waiting: String(localized: "Waiting for approval", bundle: .module)
         case .resting: room == .breakRoom ? String(localized: "Having coffee in the break room", bundle: .module) : String(localized: "Taking a break", bundle: .module)
         case .left: String(localized: "Went home", bundle: .module)

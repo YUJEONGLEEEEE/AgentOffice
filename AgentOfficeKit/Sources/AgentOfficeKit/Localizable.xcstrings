@@ -361,16 +361,6 @@
         }
       }
     },
-    "Resting · Coffee" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "쉬는 중 · 커피"
-          }
-        }
-      }
-    },
     "Server Room" : {
       "localizations" : {
         "ko" : {
@@ -461,7 +451,17 @@
         }
       }
     },
-    "Working in %@" : {
+    "Working at their desk" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자기 자리에서 일하는 중"
+          }
+        }
+      }
+    },
+    "Working in the %@" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {

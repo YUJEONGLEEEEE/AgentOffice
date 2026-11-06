@@ -81,7 +81,13 @@ final class AgentCardView: NSView {
         tagLabel.textColor = NSColor(hex: snapshot.status.tagTextColor)
         tagBackground.layer?.backgroundColor = NSColor(hex: snapshot.status.tagColor).cgColor
 
-        var details = [snapshot.status == .left ? OfficeText.outOfOffice : snapshot.room.displayName, lastActivityText]
+        let place = switch snapshot.status {
+        case .left: OfficeText.outOfOffice
+        // A team member at their desk: say which team they belong to instead of the room twice.
+        case .idle: snapshot.role.map { TeamRole(agentType: $0).department.displayName } ?? snapshot.room.displayName
+        default: snapshot.room.displayName
+        }
+        var details = [place, lastActivityText]
         if let floorName {
             details.insert(floorName, at: 0)
         }

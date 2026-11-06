@@ -100,15 +100,16 @@ final class AgentNode: SKNode {
             nameLabel.text = snapshot.displayName
             namePlate.size = CGSize(width: nameLabel.frame.width + 8, height: 12)
         }
-        let style = Self.tagStyle(for: snapshot.status, room: snapshot.room)
+        let style = Self.tagStyle(for: snapshot.status)
         tagLabel.text = style.text
         tagLabel.fontColor = style.foreground
         let size = CGSize(width: tagLabel.frame.width + 14, height: 18)
         tagPlate.color = style.background
         tagPlate.size = size
         tagBorder.size = CGSize(width: size.width + 4, height: size.height + 4)
-        // Team members waiting at their desks stay quiet, so the people working stand out.
-        tag.isHidden = snapshot.status == .idle
+        // Team members waiting at their desks and people having coffee stay quiet, so the people working
+        // stand out. The coffee cup already says who is on a break.
+        tag.isHidden = snapshot.status == .idle || (snapshot.status == .resting && snapshot.room == .breakRoom)
         if !isWalking {
             showRestingPose()
         }
@@ -187,9 +188,10 @@ final class AgentNode: SKNode {
     /// Neighbors in the same room alternate tag and name plate heights so they do not overlap.
     private func updateTagHeight() {
         let base = body.size.height + 14
-        let isOdd = spotIndex % 2 == 1
-        tag.position = CGPoint(x: 0, y: isOdd ? base + 22 : base)
-        namePlate.position = CGPoint(x: 0, y: isOdd ? -16 : -2)
+        // Neighbors stand at three different heights, so their tags and name plates do not cover each other.
+        let level = CGFloat(spotIndex % 3)
+        tag.position = CGPoint(x: 0, y: base + level * 20)
+        namePlate.position = CGPoint(x: 0, y: -2 - level * 14)
     }
 
     private func showRestingPose() {
@@ -214,9 +216,8 @@ final class AgentNode: SKNode {
         let foreground: SKColor
     }
 
-    private static func tagStyle(for status: AgentStatus, room: Room) -> TagStyle {
-        let text = status == .resting && room == .breakRoom ? String(localized: "Resting · Coffee", bundle: .module) : status.displayName
-        return TagStyle(text: text, background: SKColor(hex: status.tagColor), foreground: SKColor(hex: status.tagTextColor))
+    private static func tagStyle(for status: AgentStatus) -> TagStyle {
+        TagStyle(text: status.displayName, background: SKColor(hex: status.tagColor), foreground: SKColor(hex: status.tagTextColor))
     }
 
     private static func texture(for pose: Pose, appearance: AgentAppearance) -> SKTexture {
