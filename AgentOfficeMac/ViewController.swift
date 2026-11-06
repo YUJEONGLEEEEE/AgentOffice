@@ -316,7 +316,8 @@ class ViewController: NSViewController {
             shownFloor = floor
         }
 
-        let agents = floor.map { name in snapshots.filter { $0.floor == name } } ?? snapshots
+        // The team is always in the office; members with work on this floor show that work.
+        let agents = OfficeTeam.arrange(floor.map { name in snapshots.filter { $0.floor == name } } ?? snapshots)
         // In the whole office, name plates also say which project each agent works on.
         officeScene.show(agents: floor == nil ? agents.map(Self.withProjectName) : agents)
         floorActivity = floor.map { name in office.activity.filter { $0.floor == name } } ?? office.activity
@@ -347,8 +348,8 @@ class ViewController: NSViewController {
             card.configure(
                 with: agent,
                 helpers: sessionsByID[agent.id]?.activeSubagentIDs.count ?? 0,
-                floorName: shownFloor == nil ? agent.floor : nil,
-                lastActivityText: lastActivityText(for: agent.lastActivity, now: now)
+                floorName: shownFloor == nil && !agent.floor.isEmpty ? agent.floor : nil,
+                lastActivityText: agent.status == .idle ? "자기 자리" : lastActivityText(for: agent.lastActivity, now: now)
             )
             cards.append(card)
         }

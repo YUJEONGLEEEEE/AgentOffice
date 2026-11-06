@@ -49,6 +49,7 @@ public struct OfficeLayout: Sendable {
             // Server room: air conditioner, racks
             CGRect(x: 888, y: 318, width: 58, height: 18),
             CGRect(x: 794, y: 380, width: 94, height: 130),
+            CGRect(x: 896, y: 574, width: 50, height: 26),
             // Break room: fridge and coffee machine, vending machine, round table, sofa, plant
             CGRect(x: 1072, y: 318, width: 68, height: 44),
             CGRect(x: 1100, y: 380, width: 36, height: 64),
@@ -115,10 +116,10 @@ public struct OfficeLayout: Sendable {
         switch room {
         case .meetingRoom: CGPoint(x: 165, y: 216)
         case .archive: CGPoint(x: 600, y: 112)
-        case .researchRoom: CGPoint(x: 944, y: 236)
-        case .devRoom: CGPoint(x: 232, y: 456)
-        case .desk: CGPoint(x: 554, y: 466)
-        case .serverRoom: CGPoint(x: 870, y: 580)
+        case .researchRoom: CGPoint(x: 1050, y: 238)
+        case .devRoom: CGPoint(x: 232, y: 602)
+        case .desk: CGPoint(x: 660, y: 606)
+        case .serverRoom: CGPoint(x: 840, y: 566)
         case .breakRoom: CGPoint(x: 1076, y: 526)
         }
     }
@@ -133,6 +134,25 @@ public struct OfficeLayout: Sendable {
             return wanted
         }
         return nearestWalkablePoint(to: wanted, in: interior(for: room)) ?? base
+    }
+
+    // MARK: - Seats
+
+    /// Each team member's own desk, where they wait when they have nothing to do.
+    /// The point is just in front of their chair.
+    public func seat(forAgentType agentType: String) -> (room: Room, point: CGPoint)? {
+        switch agentType {
+        case "contest-analyst": (.desk, CGPoint(x: 546, y: 466))
+        case "service-planner": (.desk, CGPoint(x: 688, y: 466))
+        case "pitch-writer": (.desk, CGPoint(x: 546, y: 592))
+        case "market-researcher": (.researchRoom, CGPoint(x: 818, y: 224))
+        case "data-analyst": (.researchRoom, CGPoint(x: 934, y: 224))
+        case "ui-designer": (.archive, CGPoint(x: 450, y: 238))
+        case "ios-developer": (.devRoom, CGPoint(x: 90, y: 458))
+        case "web-developer": (.devRoom, CGPoint(x: 230, y: 458))
+        case "qa-reviewer": (.serverRoom, CGPoint(x: 924, y: 610))
+        default: nil
+        }
     }
 
     // MARK: - Walking
@@ -166,6 +186,11 @@ public struct OfficeLayout: Sendable {
     public func path(from start: Room?, startIndex: Int = 0, to end: Room?, endIndex: Int = 0) -> [CGPoint] {
         let origin = start.map { spot(for: $0, index: startIndex) } ?? elevatorSpot
         let target = end.map { spot(for: $0, index: endIndex) } ?? elevatorSpot
+        return path(from: origin, to: target)
+    }
+
+    /// The route between two points on the floor, in top-left coordinates.
+    public func path(from origin: CGPoint, to target: CGPoint) -> [CGPoint] {
         guard let from = cell(at: origin), let to = cell(at: target), walkableCells[from], walkableCells[to] else {
             return [target]
         }

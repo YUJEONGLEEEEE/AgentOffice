@@ -12,6 +12,8 @@ public enum AgentStatus: String, CaseIterable, Codable, Sendable {
     case resting
     /// The session ended, or there has been no activity for too long.
     case left
+    /// A team member sitting at their own desk with nothing to do.
+    case idle
 
     public var displayName: String {
         switch self {
@@ -21,6 +23,7 @@ public enum AgentStatus: String, CaseIterable, Codable, Sendable {
         case .waiting: "기다리는 중"
         case .resting: "쉬는 중"
         case .left: "퇴근"
+        case .idle: "대기 중"
         }
     }
 }
@@ -35,13 +38,14 @@ extension AgentStatus {
         case .resting: 0xBFE3C8
         case .arrived, .received: 0xBFD7F5
         case .left: 0xC9C0B0
+        case .idle: 0xDDE3EA
         }
     }
 
     /// Text color on top of `tagColor`.
     public var tagTextColor: UInt32 {
         switch self {
-        case .working, .left: 0x2E2A35
+        case .working, .left, .idle: 0x2E2A35
         case .waiting: 0x1F1C24
         case .resting: 0x1F3A28
         case .arrived, .received: 0x1E3350
