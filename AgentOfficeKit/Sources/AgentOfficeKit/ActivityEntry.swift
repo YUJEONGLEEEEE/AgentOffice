@@ -31,6 +31,7 @@ public struct ActivityEntry: Identifiable, Equatable, Sendable {
         case .waiting: "허락을 기다리는 중"
         case .resting: room == .breakRoom ? "탕비실에서 커피 마시는 중" : "쉬는 중"
         case .left: "퇴근했어요"
+        case .idle: "자리로 돌아왔어요"
         }
     }
 }

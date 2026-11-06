@@ -12,6 +12,8 @@ final class AgentNode: SKNode {
     /// The room the agent is in, or heading to. `nil` means the elevator.
     private(set) var room: Room?
     private(set) var spotIndex = 0
+    /// Where the agent stands or is heading, in top-left coordinates.
+    private(set) var target: CGPoint = .zero
     private(set) var isWalking = false
 
     private let appearance: AgentAppearance
@@ -93,6 +95,11 @@ final class AgentNode: SKNode {
     /// Updates the tag and pose for the latest status.
     func apply(_ snapshot: AgentSnapshot) {
         status = snapshot.status
+        if nameLabel.text != snapshot.name {
+            // A team member's name plate says who they are working for, so it changes between tasks.
+            nameLabel.text = snapshot.name
+            namePlate.size = CGSize(width: nameLabel.frame.width + 8, height: 12)
+        }
         let style = Self.tagStyle(for: snapshot.status, room: snapshot.room)
         tagLabel.text = style.text
         tagLabel.fontColor = style.foreground
@@ -100,23 +107,24 @@ final class AgentNode: SKNode {
         tagPlate.color = style.background
         tagPlate.size = size
         tagBorder.size = CGSize(width: size.width + 4, height: size.height + 4)
+        // Team members waiting at their desks stay quiet, so the people working stand out.
+        tag.isHidden = snapshot.status == .idle
         if !isWalking {
             showRestingPose()
         }
     }
 
-    /// Walks along the route to a new room. A new walk that arrives mid-walk waits for the current one,
-    /// so agents never cut through walls.
-    func walk(to destination: Room?, index: Int, layout: OfficeLayout, completion: (() -> Void)? = nil) {
-        let start = room
-        let startIndex = spotIndex
+    /// Walks along the route to `point` in a room (`nil` means the elevator). A new walk that arrives
+    /// mid-walk waits for the current one, so agents never cut through walls or furniture.
+    func walk(to destination: Room?, index: Int, point: CGPoint, layout: OfficeLayout, completion: (() -> Void)? = nil) {
+        let start = target
         room = destination
         spotIndex = index
+        target = point
 
         let begin = { [weak self] in
             guard let self else { return }
-            let points = layout.path(from: start, startIndex: startIndex, to: destination, endIndex: index)
-                .map(layout.scenePoint)
+            let points = layout.path(from: start, to: point).map(layout.scenePoint)
             self.followPath(points, completion: completion)
         }
 
@@ -128,10 +136,10 @@ final class AgentNode: SKNode {
     }
 
     /// Places the agent without walking, for example when the office first appears.
-    func place(in destination: Room?, index: Int, layout: OfficeLayout) {
+    func place(in destination: Room?, index: Int, point: CGPoint, layout: OfficeLayout) {
         room = destination
         spotIndex = index
-        let point = destination.map { layout.spot(for: $0, index: index) } ?? layout.elevatorSpot
+        target = point
         position = layout.scenePoint(point)
         updateDepth()
         updateTagHeight()

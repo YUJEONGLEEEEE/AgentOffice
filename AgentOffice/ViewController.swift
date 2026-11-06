@@ -195,7 +195,8 @@ class ViewController: UIViewController {
             AgentSnapshot(id: agent.id, name: agent.name, floor: agent.floor, room: agent.room,
                           status: agent.status(at: now), lastActivity: agent.lastActivity, role: agent.role)
         }
-        let onFloor = floor.map { name in current.filter { $0.floor == name } } ?? current
+        // The team is always in the office; members with work on this floor show that work.
+        let onFloor = OfficeTeam.arrange(floor.map { name in current.filter { $0.floor == name } } ?? current)
         officeScene.show(agents: onFloor)
         shownAgents = onFloor.sorted { ($0.status == .left ? 1 : 0, $1.lastActivity) < ($1.status == .left ? 1 : 0, $0.lastActivity) }
 
@@ -206,7 +207,7 @@ class ViewController: UIViewController {
     }
 
     private func updateStatusLabel(now: Date) {
-        let working = shownAgents.filter { $0.status != .left }.count
+        let working = shownAgents.filter { $0.status != .left && $0.status != .idle }.count
         guard let lastUpdated else {
             statusLabel.text = nil
             return
@@ -241,7 +242,7 @@ extension ViewController: UITableViewDataSource {
         var content = UIListContentConfiguration.subtitleCell()
         content.text = agent.name
         var details = [agent.status.displayName, agent.status == .left ? "사무실 밖" : agent.room.displayName]
-        if shownFloor == nil {
+        if shownFloor == nil && !agent.floor.isEmpty {
             details.append(agent.floor)
         }
         content.secondaryText = details.joined(separator: " · ")

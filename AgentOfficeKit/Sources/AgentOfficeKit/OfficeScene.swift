@@ -12,6 +12,8 @@ public final class OfficeScene: SKScene {
     private var agentNodes: [String: AgentNode] = [:]
     private var pendingSnapshots: [AgentSnapshot]?
     private var hasShownAgents = false
+    /// Desk name plates by agent type. A plate shows only while its owner is away from the desk.
+    private var deskPlates: [String: SKNode] = [:]
     /// Frames of the furniture drawn so far, so tests can check agents walk around all of it.
     private(set) var furnitureFrames: [CGRect] = []
 
@@ -50,9 +52,10 @@ public final class OfficeScene: SKScene {
         }
 
         let present = snapshots.filter { $0.status != .left }
+        // Team members waiting at their desks stand at their seats; everyone else shares the room spots.
         var spotIndices: [String: Int] = [:]
         for room in Room.allCases {
-            let ids = present.filter { $0.room == room }.map(\.id).sorted()
+            let ids = present.filter { $0.room == room && seat(for: $0) == nil }.map(\.id).sorted()
             for (index, id) in ids.enumerated() {
                 spotIndices[id] = index
             }
@@ -63,31 +66,43 @@ public final class OfficeScene: SKScene {
 
         for snapshot in present {
             let index = spotIndices[snapshot.id] ?? 0
+            let point = seat(for: snapshot) ?? layout.spot(for: snapshot.room, index: index)
             if let node = agentNodes[snapshot.id] {
                 node.apply(snapshot)
-                if node.room != snapshot.room || node.spotIndex != index {
-                    node.walk(to: snapshot.room, index: index, layout: layout)
+                if node.target != point {
+                    node.walk(to: snapshot.room, index: index, point: point, layout: layout)
                 }
             } else {
                 let node = AgentNode(snapshot: snapshot)
                 agentNodes[snapshot.id] = node
                 addChild(node)
                 if animate {
-                    node.place(in: nil, index: 0, layout: layout)
-                    node.walk(to: snapshot.room, index: index, layout: layout)
+                    node.place(in: nil, index: 0, point: layout.elevatorSpot, layout: layout)
+                    node.walk(to: snapshot.room, index: index, point: point, layout: layout)
                 } else {
-                    node.place(in: snapshot.room, index: index, layout: layout)
+                    node.place(in: snapshot.room, index: index, point: point, layout: layout)
                 }
             }
+        }
+
+        for (agentType, plate) in deskPlates {
+            let owner = present.first { $0.id == OfficeTeam.residentID(for: agentType) }
+            plate.isHidden = owner == nil || owner?.status == .idle
         }
 
         let presentIDs = Set(present.map(\.id))
         for (id, node) in agentNodes where !presentIDs.contains(id) {
             agentNodes[id] = nil
-            node.walk(to: nil, index: 0, layout: layout) { [weak node] in
+            node.walk(to: nil, index: 0, point: layout.elevatorSpot, layout: layout) { [weak node] in
                 node?.run(.sequence([.fadeOut(withDuration: 0.3), .removeFromParent()]))
             }
         }
+    }
+
+    /// A team member with nothing to do waits at their own desk.
+    private func seat(for snapshot: AgentSnapshot) -> CGPoint? {
+        guard snapshot.status == .idle, let role = snapshot.role else { return nil }
+        return layout.seat(forAgentType: role)?.point
     }
 
     /// Removes every agent at once, for example when switching to another floor.
@@ -120,6 +135,7 @@ public final class OfficeScene: SKScene {
         furnishDesks()
         furnishServerRoom()
         furnishBreakRoom()
+        drawDeskPlates()
     }
 
     private enum Layer {
@@ -179,6 +195,33 @@ public final class OfficeScene: SKScene {
 
         let text = signText(for: room)
         drawSign(title: text.title, subtitle: text.subtitle, at: CGPoint(x: interior.minX + 6, y: interior.minY + 4))
+    }
+
+    /// A small name plate on each team member's desk.
+    private func drawDeskPlates() {
+        for role in OfficeTeam.roster {
+            guard let seat = layout.seat(forAgentType: role.agentType) else { continue }
+            let label = SKLabelNode(text: role.title)
+            label.fontName = "AppleSDGothicNeo-Bold"
+            label.fontSize = 8
+            label.fontColor = OfficePalette.signText
+            label.verticalAlignmentMode = .center
+            label.zPosition = 0.1
+
+            let plate = CGRect(x: seat.point.x - (label.frame.width + 8) / 2, y: seat.point.y - 46,
+                               width: label.frame.width + 8, height: 11)
+            let back = box(plate.offsetBy(dx: 0, dy: 2), SKColor(hex: role.department.uniform), z: Layer.detail + 0.2)
+            let front = box(plate, OfficePalette.wall, z: Layer.detail + 0.3)
+            front.addChild(label)
+            let group = SKNode()
+            for node in [back, front] {
+                node.removeFromParent()
+                group.addChild(node)
+            }
+            group.isHidden = true
+            addChild(group)
+            deskPlates[role.agentType] = group
+        }
     }
 
     private func drawSign(title: String, subtitle: String, at topLeft: CGPoint) {
@@ -359,6 +402,11 @@ public final class OfficeScene: SKScene {
             }
         }
         box(rect(o, 18, 206, 144, 6), OfficePalette.signSubtitle, z: Layer.detail)
+        // The QA reviewer's inspection desk with a checklist
+        desk(rect(o, 116, 264, 50, 22), color: SKColor(hex: 0x9AA3AE))
+        box(rect(o, 124, 268, 14, 12), OfficePalette.paper, z: Layer.detail)
+        box(rect(o, 127, 271, 8, 2), OfficePalette.green, z: Layer.detail + 0.1)
+        box(rect(o, 127, 275, 8, 2), OfficePalette.green, z: Layer.detail + 0.1)
     }
 
     private func furnishBreakRoom() {
