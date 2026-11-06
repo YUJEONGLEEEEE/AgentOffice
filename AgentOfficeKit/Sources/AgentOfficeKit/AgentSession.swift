@@ -12,6 +12,8 @@ public struct AgentSession: Identifiable, Equatable, Sendable {
 
     public let id: String
     public private(set) var project: String
+    /// The project folder's ID from the latest event that had one.
+    public private(set) var projectFolder: ProjectFolderID?
     public private(set) var room: Room = .desk
     public private(set) var lastActivity: Date
     /// Team members (subagents) that started and have not stopped yet, by agent ID.
@@ -40,6 +42,11 @@ public struct AgentSession: Identifiable, Equatable, Sendable {
         }
     }
 
+    /// Shows the session on the floor of its project folder's current name.
+    public mutating func renameProject(to name: String) {
+        project = name
+    }
+
     /// Updates the state with the next event.
     public mutating func apply(_ event: AgentEvent) {
         guard event.sessionID == id else { return }
@@ -47,6 +54,9 @@ public struct AgentSession: Identifiable, Equatable, Sendable {
         lastActivity = max(lastActivity, event.timestamp)
         if !event.project.isEmpty {
             project = event.project
+        }
+        if let folder = event.projectFolder {
+            projectFolder = folder
         }
 
         // Subagents are tracked separately; they do not move the main agent.
