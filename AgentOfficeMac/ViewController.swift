@@ -392,7 +392,6 @@ class ViewController: NSViewController {
         let showsBuilding = viewStyle == .building && floor == nil
         let shows3DFloor = viewStyle == .building && floor != nil
         officeView.isHidden = shows3DFloor
-        officeView.isPaused = shows3DFloor
         floorView.isHidden = !shows3DFloor
         if shows3DFloor {
             if floorIn3D != floor {
