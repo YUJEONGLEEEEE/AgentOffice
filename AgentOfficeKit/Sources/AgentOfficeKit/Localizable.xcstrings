@@ -550,6 +550,16 @@
           }
         }
       }
+    },
+    "Drag to turn · Pinch to zoom · Tap a person for details" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "드래그해서 돌리기 · 핀치로 확대 · 사람을 탭하면 정보"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

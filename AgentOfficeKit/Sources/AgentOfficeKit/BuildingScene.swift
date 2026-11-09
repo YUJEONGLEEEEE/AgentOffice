@@ -14,6 +14,8 @@ public final class BuildingScene: SKScene {
     private var people: [String: SKSpriteNode] = [:]
     private var highlights: [String: SKNode] = [:]
     private var hoveredFloor: String?
+    private let viewCamera = SKCameraNode()
+    private static let zoomActionKey = "zoom"
 
     public override init() {
         super.init(size: layout.size)
@@ -23,6 +25,11 @@ public final class BuildingScene: SKScene {
         addChild(structure)
         peopleLayer.zPosition = Layer.people
         addChild(peopleLayer)
+        addChild(viewCamera)
+        camera = viewCamera
+        resetViewCamera()
+        // Draw the ground and the lobby now, so an empty building is not just sky.
+        build()
     }
 
     @available(*, unavailable)
@@ -41,6 +48,9 @@ public final class BuildingScene: SKScene {
             layout = BuildingLayout(floors: summaries.map(\.name))
             size = layout.size
             build()
+            if viewCamera.action(forKey: Self.zoomActionKey) == nil {
+                resetViewCamera()
+            }
         } else if summaries != floorSummaries {
             floorSummaries = summaries
             updateFloorLabels()
@@ -273,6 +283,50 @@ public final class BuildingScene: SKScene {
         } else if !isBusy {
             node.removeAction(forKey: "busy")
         }
+    }
+
+    // MARK: - Zooming
+
+    /// Moves in on a floor, then calls `completion`. Used just before the floor opens.
+    public func zoomIn(to floor: String, completion: @escaping @MainActor () -> Void) {
+        setHovered(nil)
+        guard !OfficeMotion.prefersReducedMotion, let target = closeUp(on: floor) else {
+            completion()
+            return
+        }
+        viewCamera.removeAction(forKey: Self.zoomActionKey)
+        resetViewCamera()
+        let move = SKAction.group([.move(to: target.position, duration: OfficeMotion.zoomDuration),
+                                   .scale(to: target.scale, duration: OfficeMotion.zoomDuration)])
+        move.timingMode = .easeIn
+        viewCamera.run(.sequence([move, .run { MainActor.assumeIsolated { completion() } }]), withKey: Self.zoomActionKey)
+    }
+
+    /// Starts close on a floor and moves back out to the whole building. Used when coming back from a floor.
+    public func zoomOut(from floor: String) {
+        viewCamera.removeAction(forKey: Self.zoomActionKey)
+        guard !OfficeMotion.prefersReducedMotion, let start = closeUp(on: floor) else {
+            resetViewCamera()
+            return
+        }
+        viewCamera.position = start.position
+        viewCamera.setScale(start.scale)
+        let move = SKAction.group([.move(to: CGPoint(x: size.width / 2, y: size.height / 2), duration: OfficeMotion.zoomDuration),
+                                   .scale(to: 1, duration: OfficeMotion.zoomDuration)])
+        move.timingMode = .easeOut
+        viewCamera.run(move, withKey: Self.zoomActionKey)
+    }
+
+    /// Where the camera sits to fill the view with one floor.
+    private func closeUp(on floor: String) -> (position: CGPoint, scale: CGFloat)? {
+        guard let frame = layout.frame(ofFloor: floor).map(layout.sceneRect) else { return nil }
+        let scale = max(frame.width / size.width, frame.height / size.height)
+        return (CGPoint(x: frame.midX, y: frame.midY), min(1, scale))
+    }
+
+    private func resetViewCamera() {
+        viewCamera.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        viewCamera.setScale(1)
     }
 
     // MARK: - Picking a floor
