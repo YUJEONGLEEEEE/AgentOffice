@@ -15,6 +15,8 @@ public final class FloorModel3D {
     public private(set) var pitch: Float = 0.75
     public private(set) var zoom: Float = 1
 
+    private var entrance: Task<Void, Never>?
+
     static let pitchRange: ClosedRange<Float> = 0.3...1.4
     static let zoomRange: ClosedRange<Float> = 0.6...3
 
@@ -22,21 +24,53 @@ public final class FloorModel3D {
 
     /// Turns the camera. Positive `dx` turns to the right; positive `dy` looks more from above.
     public func turn(dx: Float, dy: Float) {
+        stopEntrance()
         yaw -= dx
         pitch = min(Self.pitchRange.upperBound, max(Self.pitchRange.lowerBound, pitch + dy))
     }
 
     /// Zooms by a factor: above 1 moves closer.
     public func zoom(by factor: Float) {
+        stopEntrance()
         zoom = min(Self.zoomRange.upperBound, max(Self.zoomRange.lowerBound, zoom * factor))
     }
 
     /// Back to the view the floor opens with.
     public func resetCamera() {
+        stopEntrance()
         yaw = .pi / 4
         pitch = 0.75
         zoom = 1
         selectedID = nil
+    }
+
+    /// Opens the floor from a little farther away and turned, then settles on the usual view.
+    /// Does nothing when Reduce Motion is on.
+    public func playEntrance() {
+        resetCamera()
+        guard !OfficeMotion.prefersReducedMotion else { return }
+        let endYaw = yaw, endZoom = zoom
+        let startYaw = endYaw - 0.5, startZoom: Float = 0.65
+        yaw = startYaw
+        zoom = startZoom
+        entrance = Task { [weak self] in
+            let start = ContinuousClock.now
+            while !Task.isCancelled {
+                let elapsed = start.duration(to: .now)
+                let t = Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18
+                let progress = Float(OfficeMotion.easeInOut(t / OfficeMotion.entranceDuration))
+                guard let self else { return }
+                self.yaw = startYaw + (endYaw - startYaw) * progress
+                self.zoom = startZoom + (endZoom - startZoom) * progress
+                if progress >= 1 { return }
+                try? await Task.sleep(for: .milliseconds(16))
+            }
+        }
+    }
+
+    private func stopEntrance() {
+        entrance?.cancel()
+        entrance = nil
     }
 
     var selectedAgent: AgentSnapshot? {
@@ -104,7 +138,7 @@ public struct FloorView3D: View {
             }
         }
         .overlay(alignment: .bottom) {
-            Text(String(localized: "Drag to turn · Pinch or scroll to zoom · Click a person for details", bundle: .module))
+            Text(Self.hint)
                 .font(.caption)
                 .foregroundStyle(.white.opacity(0.9))
                 .padding(.horizontal, 12)
@@ -115,6 +149,16 @@ public struct FloorView3D: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(String(localized: "Floor in 3D", bundle: .module))
+    }
+}
+
+extension FloorView3D {
+    static var hint: String {
+        #if os(macOS)
+        String(localized: "Drag to turn · Pinch or scroll to zoom · Click a person for details", bundle: .module)
+        #else
+        String(localized: "Drag to turn · Pinch to zoom · Tap a person for details", bundle: .module)
+        #endif
     }
 }
 

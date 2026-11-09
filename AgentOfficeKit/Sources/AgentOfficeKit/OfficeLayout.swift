@@ -84,11 +84,21 @@ public struct OfficeLayout: Sendable {
     private let columns: Int
     private let rows: Int
     private var walkableCells: [Bool] = []
+    /// Spots for several agents in each room, worked out once so they never overlap.
+    private var spreadSpots: [Room: [CGPoint]] = [:]
+
+    /// How far apart two agents stand, at least, so neither hides the other.
+    static let personSpacing: CGFloat = 34
+    /// How many agents each room has separate spots for.
+    static let spotsPerRoom = 15
 
     public init() {
         columns = Int(size.width / Self.cellSize)
         rows = Int(size.height / Self.cellSize)
         walkableCells = (0..<(columns * rows)).map { isWalkable(center(of: $0)) }
+        for room in Room.allCases {
+            spreadSpots[room] = makeSpreadSpots(for: room)
+        }
     }
 
     // MARK: - Rooms
@@ -125,15 +135,34 @@ public struct OfficeLayout: Sendable {
     }
 
     /// Where several agents in the same room stand, so they do not overlap.
-    /// A spot that would land on furniture moves to the nearest free floor in the room.
     public func spot(for room: Room, index: Int) -> CGPoint {
+        guard let spots = spreadSpots[room], !spots.isEmpty else { return spot(for: room) }
+        return spots[index % spots.count]
+    }
+
+    /// Spots in rows around the room's main spot. A spot on furniture moves to the nearest free floor,
+    /// and one that would end up too close to an earlier spot or a team member's chair is skipped.
+    private func makeSpreadSpots(for room: Room) -> [CGPoint] {
         let base = spot(for: room)
-        let offsets: [CGFloat] = [0, -56, 56, -112, 112]
-        let wanted = CGPoint(x: base.x + offsets[index % 5], y: base.y + CGFloat(index / 5) * 36)
-        if interior(for: room).contains(wanted) && isWalkable(wanted) {
-            return wanted
+        let area = interior(for: room)
+        let chairs = OfficeTeam.roster.compactMap { seat(forAgentType: $0.agentType) }.filter { $0.room == room }.map(\.point)
+        let columnOffsets: [CGFloat] = [0, -56, 56, -112, 112, -168, 168, -224, 224]
+        let rowOffsets: [CGFloat] = [0, 36, -36, 72, -72, 108, -108]
+
+        var spots: [CGPoint] = []
+        func isClear(_ point: CGPoint) -> Bool {
+            (spots + chairs).allSatisfy { hypot($0.x - point.x, $0.y - point.y) >= Self.personSpacing }
         }
-        return nearestWalkablePoint(to: wanted, in: interior(for: room)) ?? base
+        for dy in rowOffsets {
+            for dx in columnOffsets where spots.count < Self.spotsPerRoom {
+                let wanted = CGPoint(x: base.x + dx, y: base.y + dy)
+                let point = area.contains(wanted) && isWalkable(wanted) ? wanted : nearestWalkablePoint(to: wanted, in: area)
+                if let point, isClear(point) {
+                    spots.append(point)
+                }
+            }
+        }
+        return spots.isEmpty ? [base] : spots
     }
 
     // MARK: - Seats

@@ -11,6 +11,16 @@
         }
       }
     },
+    "Building" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "건물"
+          }
+        }
+      }
+    },
     "Couldn’t load the office.\nTrying again soon." : {
       "localizations" : {
         "ko" : {
@@ -77,6 +87,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "직원"
+          }
+        }
+      }
+    },
+    "View style" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보기 방식"
           }
         }
       }

@@ -206,8 +206,11 @@ class ViewController: NSViewController {
         officeView.addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect],
                                                   owner: officeView, userInfo: nil))
         buildingScene.onSelectFloor = { [weak self] floor in
-            self?.chosenFloor = floor
-            self?.updateFloor(now: .now)
+            // Move in on the floor first, then open it.
+            self?.buildingScene.zoomIn(to: floor) {
+                self?.chosenFloor = floor
+                self?.updateFloor(now: .now)
+            }
         }
 
         backToBuildingButton.bezelStyle = .push
@@ -393,15 +396,20 @@ class ViewController: NSViewController {
         floorView.isHidden = !shows3DFloor
         if shows3DFloor {
             if floorIn3D != floor {
-                floorModel.resetCamera()
+                floorModel.playEntrance()
                 floorIn3D = floor
             }
             floorModel.agents = agents
         } else {
+            let leftFloor = floorIn3D
             floorIn3D = nil
             if showsBuilding {
                 present(buildingScene)
                 buildingScene.show(agents: snapshots)
+                // Coming back from a floor: start close on it and move out to the whole building.
+                if let leftFloor {
+                    buildingScene.zoomOut(from: leftFloor)
+                }
             } else {
                 present(officeScene)
                 // In the whole office, name plates also say which project each agent works on.
