@@ -251,12 +251,15 @@ public struct FloorPlan3D: Sendable {
 
     /// Where everyone on the floor is and what they are doing.
     ///
-    /// Team members in the room of their own desk use their chair; everyone else fills the room's spots in order.
+    /// A team member in the room of their own desk uses their chair. Only the resident member has a chair,
+    /// so extra members of the same role (several researchers at once) stand at the room's spots like everyone else.
     public func placements(for agents: [AgentSnapshot]) -> [String: Placement] {
         var result: [String: Placement] = [:]
         var used: [Room: Int] = [:]
+        var taken: [CGPoint] = []
         for agent in agents.filter({ $0.status != .left }).sorted(by: { ($0.role != nil ? 1 : 0, $0.id) < ($1.role != nil ? 1 : 0, $1.id) }) {
-            if let role = agent.role, let seat = seat(forAgentType: role), seat.room == agent.room {
+            if let role = agent.role, agent.id == OfficeTeam.residentID(for: role),
+               let seat = seat(forAgentType: role), seat.room == agent.room {
                 let act = FloorAct(status: agent.status, room: agent.room, seated: true)
                 result[agent.id] = Placement(point: seat.spot.point, facing: seat.spot.facing, act: act, isSeated: true)
                 continue
@@ -265,14 +268,36 @@ public struct FloorPlan3D: Sendable {
             let index = used[agent.room, default: 0]
             used[agent.room] = index + 1
             let base = spots[index % spots.count]
-            // Extra people beyond the spots stand a little to the side of an earlier one.
-            let extra = Double(index / spots.count) * 0.7
-            let point = CGPoint(x: base.point.x + extra, y: base.point.y)
+            // Extra people beyond the spots find free floor near one of them.
+            let point = index < spots.count ? base.point : freePoint(near: base.point, in: agent.room, avoiding: taken)
+            taken.append(point)
             let act = base.act.map { agent.status == .working ? $0 : FloorAct(status: agent.status, room: agent.room, seated: false) }
                 ?? FloorAct(status: agent.status, room: agent.room, seated: false)
-            result[agent.id] = Placement(point: isWalkable(point) ? point : base.point, facing: base.facing, act: act, isSeated: false)
+            result[agent.id] = Placement(point: point, facing: base.facing, act: act, isSeated: false)
         }
         return result
+    }
+
+    /// How far apart two people stand, at least, so neither hides the other.
+    static let personSpacing: Double = 0.6
+
+    /// The nearest walkable point in the room, around `point`, that keeps its distance from everyone already placed.
+    private func freePoint(near point: CGPoint, in room: Room, avoiding taken: [CGPoint]) -> CGPoint {
+        let area = frame(of: room)
+        let chairs = OfficeTeam.roster.compactMap { seat(forAgentType: $0.agentType) }.filter { $0.room == room }.map(\.spot.point)
+        let others = taken + chairs + visitorSpots(in: room).map(\.point)
+        for step in 1...12 {
+            let radius = Double(step) * 0.3
+            for direction in 0..<12 {
+                let angle = Double(direction) / 12 * 2 * .pi
+                let candidate = CGPoint(x: point.x + radius * cos(angle), y: point.y + radius * sin(angle))
+                guard area.contains(candidate), isWalkable(candidate) else { continue }
+                if others.allSatisfy({ hypot($0.x - candidate.x, $0.y - candidate.y) >= Self.personSpacing }) {
+                    return candidate
+                }
+            }
+        }
+        return point
     }
 }
 

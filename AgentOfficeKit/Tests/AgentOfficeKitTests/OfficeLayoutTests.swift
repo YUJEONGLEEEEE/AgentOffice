@@ -44,6 +44,25 @@ struct OfficeLayoutTests {
         }
     }
 
+    @Test func spreadSpotsKeepAgentsApart() {
+        for room in Room.allCases {
+            let chairs = OfficeTeam.roster.compactMap { layout.seat(forAgentType: $0.agentType) }.filter { $0.room == room }.map(\.point)
+            let spots = (0..<10).map { layout.spot(for: room, index: $0) }
+            for (i, a) in spots.enumerated() {
+                for b in spots[(i + 1)...] + chairs {
+                    #expect(hypot(a.x - b.x, a.y - b.y) >= OfficeLayout.personSpacing, "\(room) #\(i) is too close to \(b)")
+                }
+            }
+        }
+    }
+
+    @Test func firstSpotsStayWhereTheyWere() {
+        // Up to three agents in a room stand where they always have.
+        #expect(layout.spot(for: .devRoom, index: 0) == layout.spot(for: .devRoom))
+        #expect(layout.spot(for: .devRoom, index: 1) == CGPoint(x: 176, y: 602))
+        #expect(layout.spot(for: .devRoom, index: 2) == CGPoint(x: 288, y: 602))
+    }
+
     @Test func elevatorSpotIsWalkable() {
         #expect(layout.isWalkable(layout.elevatorSpot))
     }

@@ -94,10 +94,35 @@ struct FloorPlan3DTests {
     }
 
     @Test func peopleInTheSameRoomDoNotStandOnTopOfEachOther() {
-        let agents = (0..<9).map { agent("s\($0)", room: .meetingRoom) }
-        let points = plan.placements(for: agents).values.map(\.point)
+        for room in Room.allCases {
+            let agents = (0..<8).map { agent("s\($0)", room: room) }
+            let points = plan.placements(for: agents).values.map(\.point)
 
-        #expect(Set(points.map { "\($0.x),\($0.y)" }).count == agents.count)
+            #expect(points.count == agents.count)
+            for (i, a) in points.enumerated() {
+                #expect(plan.isWalkable(a), "\(room) \(a)")
+                for b in points[(i + 1)...] {
+                    #expect(hypot(a.x - b.x, a.y - b.y) >= FloorPlan3D.personSpacing - 0.001, "\(room) \(a) \(b)")
+                }
+            }
+        }
+    }
+
+    @Test func onlyTheResidentSitsInTheChairWhenSeveralShareARole() {
+        // Three researchers searching the web at once: the resident and two extra jobs.
+        let resident = agent(OfficeTeam.residentID(for: "market-researcher"), room: .researchRoom, role: "market-researcher")
+        let extras = ["a1", "a2"].map { agent($0, room: .researchRoom, role: "market-researcher") }
+        let analyst = agent(OfficeTeam.residentID(for: "data-analyst"), room: .researchRoom, status: .idle, role: "data-analyst")
+        let placements = plan.placements(for: [resident, analyst] + extras)
+
+        #expect(placements[resident.id]?.isSeated == true)
+        #expect(extras.allSatisfy { placements[$0.id]?.isSeated == false })
+        let points = placements.values.map(\.point)
+        for (i, a) in points.enumerated() {
+            for b in points[(i + 1)...] {
+                #expect(hypot(a.x - b.x, a.y - b.y) >= FloorPlan3D.personSpacing - 0.001, "\(a) \(b)")
+            }
+        }
     }
 
     @Test func peopleWhoLeftAreNotPlaced() {
