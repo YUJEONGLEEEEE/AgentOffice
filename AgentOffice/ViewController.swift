@@ -281,7 +281,6 @@ class ViewController: UIViewController {
         let showsBuilding = viewStyle == .building && floor == nil
         let shows3DFloor = viewStyle == .building && floor != nil
         officeView.isHidden = shows3DFloor
-        officeView.isPaused = shows3DFloor
         floorHost.view.isHidden = !shows3DFloor
         backToBuildingButton.isHidden = !shows3DFloor
 

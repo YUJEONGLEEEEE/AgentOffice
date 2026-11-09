@@ -95,6 +95,7 @@ public struct OfficeLayout: Sendable {
     public init() {
         columns = Int(size.width / Self.cellSize)
         rows = Int(size.height / Self.cellSize)
+        walkingAreas = makeWalkingAreas()
         walkableCells = (0..<(columns * rows)).map { isWalkable(center(of: $0)) }
         for room in Room.allCases {
             spreadSpots[room] = makeSpreadSpots(for: room)
@@ -197,7 +198,10 @@ public struct OfficeLayout: Sendable {
     }
 
     /// Floor where feet can go. The top edge leaves room for the agent's body in front of the wall.
-    private var walkingAreas: [CGRect] {
+    /// Worked out once in `init`, since every grid cell is checked against it.
+    private var walkingAreas: [CGRect] = []
+
+    private func makeWalkingAreas() -> [CGRect] {
         let areas = Room.allCases.map(interior(for:)) + [hallway.insetBy(dx: 0, dy: wallThickness)]
         let floors = areas.map { area in
             CGRect(x: area.minX + 14, y: area.minY + 16, width: area.width - 28, height: area.height - 18)
@@ -262,10 +266,26 @@ public struct OfficeLayout: Sendable {
     }
 
     private func nearestWalkablePoint(to point: CGPoint, in area: CGRect) -> CGPoint? {
-        walkableCells.indices
-            .filter { walkableCells[$0] && area.contains(center(of: $0)) }
-            .map(center(of:))
-            .min { hypot($0.x - point.x, $0.y - point.y) < hypot($1.x - point.x, $1.y - point.y) }
+        // Look only at the cells inside the area, not the whole office.
+        let firstColumn = max(0, Int(area.minX / Self.cellSize)), lastColumn = min(columns - 1, Int(area.maxX / Self.cellSize))
+        let firstRow = max(0, Int(area.minY / Self.cellSize)), lastRow = min(rows - 1, Int(area.maxY / Self.cellSize))
+        guard firstColumn <= lastColumn, firstRow <= lastRow else { return nil }
+        var best: CGPoint?
+        var bestDistance = CGFloat.greatestFiniteMagnitude
+        for row in firstRow...lastRow {
+            for column in firstColumn...lastColumn {
+                let cell = row * columns + column
+                guard walkableCells[cell] else { continue }
+                let center = center(of: cell)
+                guard area.contains(center) else { continue }
+                let distance = (center.x - point.x) * (center.x - point.x) + (center.y - point.y) * (center.y - point.y)
+                if distance < bestDistance {
+                    best = center
+                    bestDistance = distance
+                }
+            }
+        }
+        return best
     }
 
     /// A* search over the walking grid with four directions. Turns cost a little extra,
