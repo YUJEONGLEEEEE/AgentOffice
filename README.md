@@ -1,5 +1,8 @@
 # AgentOffice
 
+[![Tests](https://github.com/YUJEONGLEEEEE/AgentOffice/actions/workflows/tests.yml/badge.svg)](https://github.com/YUJEONGLEEEEE/AgentOffice/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **See your Claude Code sessions at work, as a pixel-art office on your Mac and iPhone.**
 
 Every coding session becomes an employee. Every tool call sends them to a room.
