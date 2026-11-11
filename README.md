@@ -43,7 +43,7 @@ who is working, who is waiting for you and who is done.
 Claude Code ──hook──▶ JSON Lines files ──▶ Mac app ──CloudKit (summary only)──▶ iPhone app
 ```
 
-1. A Claude Code [hook](https://docs.claude.com/en/docs/claude-code/hooks) runs [`Hooks/agentoffice-event.sh`](Hooks/agentoffice-event.sh) on each event and appends one line per event to a file for that session.
+1. The AgentOffice [plugin](https://docs.claude.com/en/docs/claude-code/plugins) adds a [hook](https://docs.claude.com/en/docs/claude-code/hooks) to Claude Code. On each event it runs [`agentoffice-event.sh`](plugin/scripts/agentoffice-event.sh), which appends one line to a file for that session.
 2. The Mac app reads that folder, works out where each session is and what it is doing, and draws the office.
 3. The Mac app uploads a summary of each employee to your **private** CloudKit database.
 4. The iPhone app reads that summary and draws the same office. It is view only.
@@ -64,36 +64,31 @@ AgentOffice is built to show *what kind of work* is happening, never the work it
 - macOS 26 and iOS 26
 - Xcode 26
 - [Claude Code](https://docs.claude.com/en/docs/claude-code/overview)
-- [`jq`](https://jqlang.org) (`brew install jq`)
 - An Apple Developer account to sign the apps, for iCloud sync
 
 ## Getting started
 
-A signed download is on the way. Until then, build it from source.
+A signed download is on the way. Until then, build the app from source.
 
-1. **Clone the repository.**
+1. **Install the plugin.** In Claude Code, run:
+   ```
+   /plugin install agentoffice --marketplace YUJEONGLEEEEE/AgentOffice
+   ```
+   On Claude Code versions before 2.1.275, add the marketplace first:
+   ```
+   /plugin marketplace add YUJEONGLEEEEE/AgentOffice
+   /plugin install agentoffice@agentoffice
+   ```
+   Then run `/reload-plugins`, or start a new session. The events folder is created with the first event.
+2. **Clone the repository.**
    ```sh
    git clone https://github.com/YUJEONGLEEEEE/AgentOffice.git
    ```
-2. **Connect the hook.** Add this to `~/.claude/settings.json`, with the path to your clone. Use the same entry for `SessionStart`, `SessionEnd`, `UserPromptSubmit`, `PreToolUse`, `SubagentStart`, `SubagentStop`, `Notification` and `Stop`.
-   ```json
-   {
-     "hooks": {
-       "PreToolUse": [
-         {
-           "matcher": "*",
-           "hooks": [
-             { "type": "command", "command": "\"/path/to/AgentOffice/Hooks/agentoffice-event.sh\"", "timeout": 5 }
-           ]
-         }
-       ]
-     }
-   }
-   ```
-   Claude Code reads hooks when a session starts, so restart any open sessions.
 3. **Run the Mac app.** Open `AgentOffice.xcodeproj`, choose your team under *Signing & Capabilities* for both targets, and run the **AgentOfficeMac** scheme.
 4. **Choose the events folder** when the app asks: `~/Library/Application Support/AgentOffice/Events`.
 5. **Optional: run the iPhone app** with the **AgentOffice** scheme, signed in to the same iCloud account.
+
+To update the plugin, run `/plugin` and open **Installed**. To remove it, run `claude plugin uninstall agentoffice@agentoffice`. The event files stay in the events folder until you delete them.
 
 ## Project structure
 
@@ -102,7 +97,8 @@ A signed download is on the way. Until then, build it from source.
 | `AgentOfficeKit/` | Swift package shared by both apps: event and session models, room rules, the 2D office (SpriteKit), the building and the 3D floor (RealityKit), CloudKit sync |
 | `AgentOfficeMac/` | Mac app (AppKit). Reads the events folder and publishes the summary |
 | `AgentOffice/` | iPhone app (UIKit). Shows the office from iCloud |
-| `Hooks/` | The Claude Code hook script |
+| `plugin/` | The Claude Code plugin: the hook settings and the script that records events |
+| `.claude-plugin/` | The marketplace file that lets Claude Code install the plugin from this repository |
 
 Built with Swift 6, AppKit, UIKit, SpriteKit, RealityKit, SwiftUI, CloudKit and Swift Testing. Routes around furniture use A\* search on a walking grid.
 
@@ -116,7 +112,8 @@ swift test
 ## Roadmap
 
 - [ ] Signed and notarized Mac download on GitHub Releases
-- [ ] A setup guide in the app that installs the hook for you
+- [x] A Claude Code plugin that installs the hook
+- [ ] A setup guide in the Mac app
 - [ ] A demo mode that runs without Claude Code
 - [ ] A notification when an employee is waiting for your approval
 - [ ] iPhone app on the App Store

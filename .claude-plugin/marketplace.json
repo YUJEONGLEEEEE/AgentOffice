@@ -1,0 +1,16 @@
+{
+  "name": "agentoffice",
+  "owner": {
+    "name": "Yujeong Lee"
+  },
+  "metadata": {
+    "description": "Plugins for AgentOffice, a pixel office for your Claude Code sessions."
+  },
+  "plugins": [
+    {
+      "name": "agentoffice",
+      "source": "./plugin",
+      "description": "Records which tool each session is using, so the AgentOffice Mac app can draw it."
+    }
+  ]
+}
