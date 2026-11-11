@@ -6,6 +6,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ## [Unreleased]
 
 ### Added
+- Claude Code plugin and marketplace that install the hook, so there is no settings file to edit
 - 3D view on iPhone, with a zoom from the building into a floor and back on both apps (#21)
 - 3D office floor built with RealityKit: rooms, furniture, work animations, drag to turn, pinch to zoom (#20)
 - Building view with a 2D and 3D switch (#19)
@@ -23,6 +24,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - Claude Code hook that records an allow-list of event fields (#4)
 
 ### Changed
+- The hook script moved from `Hooks/` to `plugin/scripts/`, and `jq` no longer needs installing because macOS includes it
 - Polished the Mac menu bar, break room and app icons (#16)
 
 ### Fixed

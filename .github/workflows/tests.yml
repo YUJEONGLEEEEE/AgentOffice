@@ -29,6 +29,17 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
+      # The hook must record the tool name but never the command it ran.
+      - name: Check hook plugin
+        run: |
+          jq empty .claude-plugin/marketplace.json plugin/.claude-plugin/plugin.json plugin/hooks/hooks.json
+          events="$RUNNER_TEMP/events"
+          echo '{"hook_event_name":"PreToolUse","session_id":"ci-1","tool_name":"Bash","tool_input":{"command":"echo private"},"cwd":"/tmp/Demo"}' \
+            | AGENTOFFICE_EVENTS_DIR="$events" bash plugin/scripts/agentoffice-event.sh
+          cat "$events/ci-1.jsonl"
+          jq -e '.tool == "Bash" and .project == "Demo"' "$events/ci-1.jsonl"
+          ! grep -q private "$events/ci-1.jsonl"
+
       - name: Run package tests
         working-directory: AgentOfficeKit
         run: swift test
