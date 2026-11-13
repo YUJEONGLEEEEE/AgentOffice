@@ -6,7 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ## [Unreleased]
 
 ### Added
-- Claude Code plugin and marketplace that install the hook, so there is no settings file to edit
+- Setup guide in the Mac app, shown on first launch and from the Help menu
+- Claude Code plugin and marketplace that install the hook, so there is no settings file to edit (#25)
 - 3D view on iPhone, with a zoom from the building into a floor and back on both apps (#21)
 - 3D office floor built with RealityKit: rooms, furniture, work animations, drag to turn, pinch to zoom (#20)
 - Building view with a 2D and 3D switch (#19)
