@@ -85,7 +85,7 @@ A signed download is on the way. Until then, build the app from source.
    git clone https://github.com/YUJEONGLEEEEE/AgentOffice.git
    ```
 3. **Run the Mac app.** Open `AgentOffice.xcodeproj`, choose your team under *Signing & Capabilities* for both targets, and run the **AgentOfficeMac** scheme.
-4. **Choose the events folder** when the app asks: `~/Library/Application Support/AgentOffice/Events`.
+4. **Choose the events folder.** On first launch a setup guide walks you through it. Pick `~/Library/Application Support/AgentOffice/Events`. You can open the guide again from **Help > AgentOffice Setup Guide**.
 5. **Optional: run the iPhone app** with the **AgentOffice** scheme, signed in to the same iCloud account.
 
 To update the plugin, run `/plugin` and open **Installed**. To remove it, run `claude plugin uninstall agentoffice@agentoffice`. The event files stay in the events folder until you delete them.
@@ -113,7 +113,7 @@ swift test
 
 - [ ] Signed and notarized Mac download on GitHub Releases
 - [x] A Claude Code plugin that installs the hook
-- [ ] A setup guide in the Mac app
+- [x] A setup guide in the Mac app
 - [ ] A demo mode that runs without Claude Code
 - [ ] A notification when an employee is waiting for your approval
 - [ ] iPhone app on the App Store

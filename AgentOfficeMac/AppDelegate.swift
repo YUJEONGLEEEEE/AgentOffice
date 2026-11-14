@@ -35,6 +35,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
         office?.chooseEventsFolder(sender)
     }
 
+    /// Help > AgentOffice Setup Guide
+    @objc func showSetupGuide(_ sender: Any?) {
+        office?.showSetupGuide(sender)
+    }
+
     /// View > 2D (⌘1)
     @objc func showFlatOffice(_ sender: Any?) {
         office?.show(style: .flat)
@@ -53,6 +58,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
             return office != nil
         case #selector(showBuilding(_:)):
             menuItem.state = office?.viewStyle == .building ? .on : .off
+            return office != nil
+        case #selector(showSetupGuide(_:)):
             return office != nil
         default:
             return true

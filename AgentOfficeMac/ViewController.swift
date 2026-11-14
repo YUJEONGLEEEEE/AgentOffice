@@ -8,6 +8,7 @@
 import Cocoa
 import SpriteKit
 import AgentOfficeKit
+import SwiftUI
 
 /// The office window: floor buttons on the left, the office floor in the middle,
 /// the activity log on the right and a card for each agent at the bottom.
@@ -30,6 +31,9 @@ class ViewController: NSViewController {
     private static let allFloorsRow = 0
     private var isUpdatingFloorSelection = false
     private var refreshTimer: Timer?
+    private let setupState = SetupGuideState()
+    private var setupGuide: NSViewController?
+    private var hasOfferedSetupGuide = false
 
     private let folderLabel = NSTextField(labelWithString: "")
     private let chooseFolderButton = NSButton(title: String(localized: "Choose Events Folder…"), target: nil, action: nil)
@@ -91,6 +95,13 @@ class ViewController: NSViewController {
             let visible = window.screen?.visibleFrame.size ?? NSSize(width: 1400, height: 800)
             window.setContentSize(NSSize(width: min(1400, visible.width - 40), height: min(700, visible.height - 40)))
             window.center()
+        }
+        // First launch: nothing is connected yet, so walk the user through setup.
+        if folderAccess.folderURL == nil, !hasOfferedSetupGuide {
+            hasOfferedSetupGuide = true
+            DispatchQueue.main.async { [weak self] in
+                self?.showSetupGuide(nil)
+            }
         }
     }
 
@@ -333,11 +344,46 @@ class ViewController: NSViewController {
     @objc func chooseEventsFolder(_ sender: Any?) {
         guard let window = view.window, window.attachedSheet == nil else { return }
         folderAccess.chooseFolder(for: window) { [weak self] url in
-            guard let self, url != nil else { return }
-            self.updateFolderUI()
-            self.reload()
-            self.startRefreshing()
+            guard url != nil else { return }
+            self?.folderDidChange()
         }
+    }
+
+    private func folderDidChange() {
+        setupState.folderName = folderAccess.folderURL?.lastPathComponent
+        updateFolderUI()
+        reload()
+        startRefreshing()
+    }
+
+    // MARK: - Setup guide
+
+    /// Opens on first launch, and from Help > AgentOffice Setup Guide.
+    @objc func showSetupGuide(_ sender: Any?) {
+        guard setupGuide == nil, let window = view.window, window.attachedSheet == nil else { return }
+        setupState.folderName = folderAccess.folderURL?.lastPathComponent
+        let guide = NSHostingController(rootView: SetupGuideView(
+            state: setupState,
+            chooseFolder: { [weak self] in self?.chooseFolderFromSetupGuide() },
+            done: { [weak self] in self?.closeSetupGuide() }
+        ))
+        guide.sizingOptions = .preferredContentSize
+        setupGuide = guide
+        presentAsSheet(guide)
+    }
+
+    private func chooseFolderFromSetupGuide() {
+        guard let guideWindow = setupGuide?.view.window else { return }
+        folderAccess.chooseFolder(for: guideWindow) { [weak self] url in
+            guard url != nil else { return }
+            self?.folderDidChange()
+        }
+    }
+
+    private func closeSetupGuide() {
+        guard let setupGuide else { return }
+        dismiss(setupGuide)
+        self.setupGuide = nil
     }
 
     private func updateFolderUI() {

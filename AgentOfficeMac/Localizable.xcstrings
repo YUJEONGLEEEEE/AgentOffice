@@ -1,6 +1,16 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ Setup Guide" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 설정 안내"
+          }
+        }
+      }
+    },
     "%lld team members" : {
       "localizations" : {
         "ko" : {
@@ -45,6 +55,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "활동 기록"
+          }
+        }
+      }
+    },
+    "AgentOffice reads only the folder you choose. Pick Events in ~/Library/Application Support/AgentOffice." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AgentOffice는 직접 고른 폴더만 읽어요. ~/Library/Application Support/AgentOffice 안의 Events 폴더를 고르세요."
+          }
+        }
+      }
+    },
+    "Allow the events folder" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록 폴더 허락하기"
           }
         }
       }
@@ -99,6 +129,16 @@
         }
       }
     },
+    "Choose Folder…" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "폴더 고르기…"
+          }
+        }
+      }
+    },
     "Choose the Events folder where Claude Code records its activity." : {
       "localizations" : {
         "ko" : {
@@ -125,6 +165,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "윈도우 닫기"
+          }
+        }
+      }
+    },
+    "Connected to %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 폴더에 연결됨"
+          }
+        }
+      }
+    },
+    "Copied" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "복사됨"
+          }
+        }
+      }
+    },
+    "Copy" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "복사"
+          }
+        }
+      }
+    },
+    "Copy the command" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "명령어 복사하기"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료"
           }
         }
       }
@@ -189,12 +279,52 @@
         }
       }
     },
+    "In Claude Code, run this command." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Code에서 이 명령어를 실행하세요."
+          }
+        }
+      }
+    },
+    "Install the plugin" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "플러그인 설치하기"
+          }
+        }
+      }
+    },
+    "Learn More on GitHub" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub에서 더 알아보기"
+          }
+        }
+      }
+    },
     "Minimize" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "최소화"
+          }
+        }
+      }
+    },
+    "Never recorded: prompts, commands, file contents or full paths." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록하지 않는 것: 프롬프트, 명령어, 파일 내용, 전체 경로"
           }
         }
       }
@@ -219,6 +349,16 @@
         }
       }
     },
+    "Open a new Claude Code session, or run /reload-plugins. The events folder is created with the first event." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Code 세션을 새로 열거나 /reload-plugins를 실행하세요. 첫 기록이 남을 때 기록 폴더가 만들어져요."
+          }
+        }
+      }
+    },
     "Quit %@" : {
       "localizations" : {
         "ko" : {
@@ -229,12 +369,32 @@
         }
       }
     },
+    "Recorded: the event, tool name, subagent type, project folder name and time." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록하는 것: 이벤트 종류, 도구 이름, 팀원 종류, 프로젝트 폴더 이름, 시간"
+          }
+        }
+      }
+    },
     "Services" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "서비스"
+          }
+        }
+      }
+    },
+    "Set Up AgentOffice" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AgentOffice 설정하기"
           }
         }
       }
@@ -269,12 +429,32 @@
         }
       }
     },
+    "Start a new session" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새 세션 시작하기"
+          }
+        }
+      }
+    },
     "Syncing with iPhone" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "iPhone과 동기화 중"
+          }
+        }
+      }
+    },
+    "Three steps connect your Claude Code sessions to the office." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세 단계만 거치면 Claude Code 세션이 사무실에 나타나요."
           }
         }
       }

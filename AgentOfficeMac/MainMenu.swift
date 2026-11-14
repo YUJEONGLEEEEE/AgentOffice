@@ -77,6 +77,8 @@ enum MainMenu {
     /// macOS adds the search field for menu commands to this menu by itself.
     private static func helpMenu() -> NSMenu {
         let menu = NSMenu(title: String(localized: "Help"))
+        menu.addItem(withTitle: String(localized: "\(appName) Setup Guide"),
+                     action: #selector(AppDelegate.showSetupGuide(_:)), keyEquivalent: "")
         NSApp.helpMenu = menu
         return menu
     }
