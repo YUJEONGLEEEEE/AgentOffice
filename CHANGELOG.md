@@ -5,8 +5,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-16
+
+The first public release: a signed and notarized Mac app, and the Claude Code plugin.
+
 ### Added
-- Setup guide in the Mac app, shown on first launch and from the Help menu
+- Release script that builds a Developer ID signed, notarized disk image
+- Setup guide in the Mac app, shown on first launch and from the Help menu (#26)
 - Claude Code plugin and marketplace that install the hook, so there is no settings file to edit (#25)
 - 3D view on iPhone, with a zoom from the building into a floor and back on both apps (#21)
 - 3D office floor built with RealityKit: rooms, furniture, work animations, drag to turn, pinch to zoom (#20)
@@ -32,3 +37,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - The 2D office could keep showing the building after leaving a 3D floor, and the layout now starts faster (#22)
 - Employees of the same role no longer share one spot in a crowded room (#21)
 - The hook records the folder the session started in (#9)
+
+[Unreleased]: https://github.com/YUJEONGLEEEEE/AgentOffice/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/YUJEONGLEEEEE/AgentOffice/releases/tag/v1.0.0

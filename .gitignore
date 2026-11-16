@@ -5,3 +5,4 @@ DerivedData/
 CLAUDE.md
 .claude/
 Secrets.xcconfig
+build/
