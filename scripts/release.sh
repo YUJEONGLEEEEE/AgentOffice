@@ -35,8 +35,9 @@ step "Checking the setup"
 VERSION="$(setting MARKETING_VERSION)"
 TEAM_ID="$(setting DEVELOPMENT_TEAM)"
 [ -n "$VERSION" ] && [ -n "$TEAM_ID" ] || fail "Could not read the version or team from the project."
-security find-identity -v -p codesigning | grep -q "Developer ID Application: .*($TEAM_ID)" \
-  || fail "No Developer ID Application certificate for team $TEAM_ID in the keychain."
+IDENTITIES="$(security find-identity -v -p codesigning)"
+IDENTITY="$(awk -F'"' -v team="($TEAM_ID)" '/Developer ID Application/ && index($2, team) { print $2; exit }' <<< "$IDENTITIES")"
+[ -n "$IDENTITY" ] || fail "No Developer ID Application certificate for team $TEAM_ID in the keychain."
 xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>&1 \
   || fail "No notary credentials named $NOTARY_PROFILE. See the top of this script."
 echo "Version $VERSION, team $TEAM_ID, commit $(git rev-parse --short HEAD)"
@@ -77,18 +78,19 @@ xcodebuild -exportArchive \
   -exportPath "$EXPORT_DIR" \
   -allowProvisioningUpdates \
   -quiet
-APP="$EXPORT_DIR/$APP_NAME.app"
-[ -d "$APP" ] || APP="$(find "$EXPORT_DIR" -maxdepth 1 -name '*.app' | head -1)"
+# The target is AgentOfficeMac; the disk image names the app AgentOffice.
+APP="$(find "$EXPORT_DIR" -maxdepth 1 -name '*.app' -print -quit)"
 [ -d "$APP" ] || fail "The export did not produce an app."
 codesign --verify --deep --strict "$APP"
-codesign -dv "$APP" 2>&1 | grep -q "Authority=Developer ID Application" || fail "The app is not signed with Developer ID."
+# Read the signature first: grep -q would stop reading early, which pipefail reports as a failure.
+SIGNATURE="$(codesign -dvv "$APP" 2>&1)"
+[[ "$SIGNATURE" == *"Authority=Developer ID Application"* ]] || fail "The app is not signed with Developer ID."
 
 step "Making the disk image"
 mkdir -p "$STAGING"
 cp -R "$APP" "$STAGING/$APP_NAME.app"
 ln -s /Applications "$STAGING/Applications"
 hdiutil create -volname "$APP_NAME" -srcfolder "$STAGING" -ov -format UDZO "$DMG" >/dev/null
-IDENTITY="$(security find-identity -v -p codesigning | awk -F'"' -v team="($TEAM_ID)" '/Developer ID Application/ && index($2, team) { print $2; exit }')"
 codesign --sign "$IDENTITY" --timestamp "$DMG"
 
 step "Notarizing (this usually takes a few minutes)"
