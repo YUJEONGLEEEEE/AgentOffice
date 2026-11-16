@@ -5,6 +5,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Changed
+- The floor list shows floors with people at work first and fades empty floors below them
+
 ## [1.0.0] - 2026-11-16
 
 The first public release: a signed and notarized Mac app, and the Claude Code plugin.
