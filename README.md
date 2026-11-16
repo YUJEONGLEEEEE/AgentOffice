@@ -30,6 +30,7 @@ who is working, who is waiting for you and who is done.
   | Break room | Resting after a reply |
   | Workspace | Everything else |
 
+- **Answer permission questions from the app.** When a session asks to use a tool, the question shows above the office and as a notification, with the command it will run. Allow or Deny there, or in the terminal as usual: whichever answers first wins.
 - **Status at a glance.** A tag over each head shows *working*, *waiting for you* or *resting*. Employees waiting for approval raise a hand.
 - **A resident team.** Custom subagents sit at their own desks in department uniforms. When they get work, the same character walks to the briefing, then to the work, and back.
 - **2D or 3D.** Switch between a top-down floor plan and a building in cutaway. Tap a floor to open it in 3D, then drag to turn and pinch to zoom.
@@ -54,9 +55,10 @@ AgentOffice is built to show *what kind of work* is happening, never the work it
 
 - The hook records only an allow-list of fields: event name, session ID, tool name, subagent type, the project **folder name** and the time.
 - Prompts, tool inputs, command text, file contents and full paths are **never** recorded.
+- Permission questions are the one exception: while a question is open, it shows the command or file it is about, so you can decide safely. It is readable only by you and deleted as soon as it is answered.
 - Event files stay on your Mac, readable only by you (`600`).
 - iCloud receives only each employee's name, floor, room, status, role and last activity time, in your private database.
-- The Mac app runs in the App Sandbox and reads only the folder you choose.
+- The Mac app runs in the App Sandbox and uses only the folder you choose.
 - The iPhone app cannot send anything back to your Mac.
 
 ## Requirements
@@ -78,7 +80,7 @@ AgentOffice is built to show *what kind of work* is happening, never the work it
    ```
    Then run `/reload-plugins`, or start a new session. The events folder is created with the first event.
 2. **Download the Mac app.** Get `AgentOffice-<version>.dmg` from the [latest release](https://github.com/YUJEONGLEEEEE/AgentOffice/releases/latest), open it and drag AgentOffice to Applications. It is signed with Developer ID and notarized by Apple.
-3. **Choose the events folder.** On first launch a setup guide walks you through it. Pick `~/Library/Application Support/AgentOffice/Events`. You can open the guide again from **Help > AgentOffice Setup Guide**.
+3. **Choose the AgentOffice folder.** On first launch a setup guide walks you through it. Pick `~/Library/Application Support/AgentOffice`. You can open the guide again from **Help > AgentOffice Setup Guide**.
 
 To update the plugin, run `/plugin` and open **Installed**. To remove it, run `claude plugin uninstall agentoffice@agentoffice`. The event files stay in the events folder until you delete them.
 

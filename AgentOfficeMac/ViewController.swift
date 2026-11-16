@@ -32,6 +32,14 @@ class ViewController: NSViewController {
     private var isUpdatingFloorSelection = false
     private var refreshTimer: Timer?
     private let setupState = SetupGuideState()
+    private let approvals = ApprovalCenter()
+    /// Permission questions from Claude Code, above the office while any are waiting.
+    private lazy var approvalPanel: NSHostingView<ApprovalPanelView> = {
+        let panel = NSHostingView(rootView: ApprovalPanelView(model: approvals.model))
+        panel.sizingOptions = [.intrinsicContentSize]
+        panel.isHidden = true
+        return panel
+    }()
     private var setupGuide: NSViewController?
     private var hasOfferedSetupGuide = false
 
@@ -78,9 +86,14 @@ class ViewController: NSViewController {
         setUpEmptyState()
         layOut(floorPanel: floorPanel, activityPanel: activityPanel, cardScroll: cardScroll)
 
+        approvals.onChange = { [weak self] in
+            guard let self else { return }
+            approvalPanel.isHidden = approvals.model.requests.isEmpty
+        }
         if folderAccess.restore() != nil {
             reload()
             startRefreshing()
+            approvals.start(folderURL: folderAccess.approvalsURL)
         }
         updateFolderUI()
     }
@@ -275,7 +288,7 @@ class ViewController: NSViewController {
         view.addLayoutGuide(officeArea)
 
         floorView.isHidden = true
-        for subview in [header, floorPanel, officeView, floorView, activityPanel, cardScroll, emptyStateLabel, backToBuildingButton] {
+        for subview in [header, floorPanel, officeView, floorView, activityPanel, cardScroll, emptyStateLabel, backToBuildingButton, approvalPanel] {
             subview.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(subview)
         }
@@ -333,6 +346,11 @@ class ViewController: NSViewController {
             backToBuildingButton.topAnchor.constraint(equalTo: officeArea.topAnchor, constant: 10),
             backToBuildingButton.leadingAnchor.constraint(equalTo: officeArea.leadingAnchor, constant: 10),
 
+            // Questions sit over the top of the office, where they are seen first.
+            approvalPanel.topAnchor.constraint(equalTo: officeArea.topAnchor),
+            approvalPanel.leadingAnchor.constraint(equalTo: officeArea.leadingAnchor),
+            approvalPanel.trailingAnchor.constraint(equalTo: officeArea.trailingAnchor),
+
             emptyStateLabel.centerXAnchor.constraint(equalTo: officeView.centerXAnchor),
             emptyStateLabel.centerYAnchor.constraint(equalTo: officeView.centerYAnchor),
         ])
@@ -350,10 +368,16 @@ class ViewController: NSViewController {
     }
 
     private func folderDidChange() {
-        setupState.folderName = folderAccess.folderURL?.lastPathComponent
+        updateSetupState()
         updateFolderUI()
         reload()
         startRefreshing()
+        approvals.start(folderURL: folderAccess.approvalsURL)
+    }
+
+    private func updateSetupState() {
+        setupState.folderName = folderAccess.folderURL?.lastPathComponent
+        setupState.choseOnlyEvents = folderAccess.choseOnlyEvents
     }
 
     // MARK: - Setup guide
@@ -361,7 +385,7 @@ class ViewController: NSViewController {
     /// Opens on first launch, and from Help > AgentOffice Setup Guide.
     @objc func showSetupGuide(_ sender: Any?) {
         guard setupGuide == nil, let window = view.window, window.attachedSheet == nil else { return }
-        setupState.folderName = folderAccess.folderURL?.lastPathComponent
+        updateSetupState()
         let guide = NSHostingController(rootView: SetupGuideView(
             state: setupState,
             chooseFolder: { [weak self] in self?.chooseFolderFromSetupGuide() },
@@ -411,9 +435,9 @@ class ViewController: NSViewController {
     }
 
     private func reload() {
-        guard let folderURL = folderAccess.folderURL else { return }
+        guard let eventsURL = folderAccess.eventsURL else { return }
         let now = Date.now
-        office = SessionStore(folderURL: folderURL).load(now: now)
+        office = SessionStore(folderURL: eventsURL).load(now: now)
         snapshots = office.sessions.flatMap { $0.snapshots(at: now) }
         // Floors with people at work come first; empty floors wait at the bottom, faded.
         floors = FloorSummary.listOrder(FloorSummary.floors(from: snapshots))

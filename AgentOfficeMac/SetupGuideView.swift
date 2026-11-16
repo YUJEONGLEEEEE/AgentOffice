@@ -6,6 +6,8 @@ import SwiftUI
 @Observable
 final class SetupGuideState {
     var folderName: String?
+    /// An earlier version asked for the Events folder; answering permission questions needs its parent.
+    var choseOnlyEvents = false
 }
 
 /// The first-run guide: install the plugin, start a session, then allow the events folder.
@@ -60,13 +62,21 @@ struct SetupGuideView: View {
                 EmptyView()
             }
 
-            step(3, title: "Allow the events folder",
-                 detail: "AgentOffice reads only the folder you choose. Pick Events in ~/Library/Application Support/AgentOffice.") {
-                HStack(spacing: 12) {
-                    Button(state.folderName == nil ? "Choose Folder…" : "Change Folder…", action: chooseFolder)
-                    if let folderName = state.folderName {
-                        Label("Connected to \(folderName)", systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
+            step(3, title: "Allow the AgentOffice folder",
+                 detail: "AgentOffice uses only the folder you choose. Pick AgentOffice in ~/Library/Application Support. The app reads activity there and saves your answers to permission questions.") {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 12) {
+                        Button(state.folderName == nil ? "Choose Folder…" : "Change Folder…", action: chooseFolder)
+                        if let folderName = state.folderName {
+                            Label("Connected to \(folderName)", systemImage: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                        }
+                    }
+                    if state.choseOnlyEvents {
+                        Label("To answer permission questions here, choose the AgentOffice folder that holds Events.",
+                              systemImage: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
             }
@@ -77,6 +87,8 @@ struct SetupGuideView: View {
                           systemImage: "checkmark.shield")
                     Label("Never recorded: prompts, commands, file contents or full paths.",
                           systemImage: "eye.slash")
+                    Label("Permission questions show the command until you answer, then are deleted.",
+                          systemImage: "hand.raised")
                 }
                 .font(.callout)
                 .frame(maxWidth: .infinity, alignment: .leading)

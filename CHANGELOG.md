@@ -5,7 +5,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+- Answer Claude Code's permission questions from the Mac app: a panel above the office and notifications with Allow and Deny
+- The plugin records permission questions and finished tools, so a raised hand goes down as soon as the question is answered
+
 ### Changed
+- The Mac app asks for the AgentOffice folder, with write access, to save answers. Choosing only the Events folder still works without approvals
 - The floor list shows floors with people at work first and fades empty floors below them
 
 ## [1.0.0] - 2026-11-16

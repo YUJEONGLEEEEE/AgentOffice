@@ -1,12 +1,16 @@
 {
   "name": "agentoffice",
-  "version": "1.0.0",
-  "description": "Records which tool each session is using, so the AgentOffice Mac app can draw it. Only the event name, session ID, tool name, subagent type, project folder name and time are recorded.",
+  "version": "1.1.0",
+  "description": "Shows your Claude Code sessions in the AgentOffice Mac app, and lets you allow or deny permission questions from the app. The event log keeps only the event, tool name, subagent type, project folder name and time.",
   "author": {
     "name": "Yujeong Lee"
   },
   "homepage": "https://github.com/YUJEONGLEEEEE/AgentOffice",
   "repository": "https://github.com/YUJEONGLEEEEE/AgentOffice",
   "license": "MIT",
-  "keywords": ["hooks", "visualization", "macos"]
+  "keywords": [
+    "hooks",
+    "visualization",
+    "macos"
+  ]
 }
