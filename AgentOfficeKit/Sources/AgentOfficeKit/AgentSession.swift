@@ -60,9 +60,17 @@ public struct AgentSession: Identifiable, Equatable, Sendable {
         }
 
         // Subagents are tracked separately; they do not move the main agent.
-        if event.isFromSubagent, event.kind == .preToolUse {
-            applyTeamMemberTool(event)
-            return
+        if event.isFromSubagent {
+            switch event.kind {
+            case .preToolUse:
+                applyTeamMemberTool(event)
+                return
+            case .permissionRequest, .postToolUse:
+                applyTeamMemberPermission(event)
+                return
+            default:
+                break
+            }
         }
 
         switch event.kind {
@@ -78,6 +86,15 @@ public struct AgentSession: Identifiable, Equatable, Sendable {
         case .preToolUse:
             recordedStatus = .working
             room = event.tool.map(Room.init(tool:)) ?? .desk
+
+        case .permissionRequest:
+            recordedStatus = .waiting
+
+        case .postToolUse:
+            // The question was answered and the tool ran; back to work in the same room.
+            if recordedStatus == .waiting {
+                recordedStatus = .working
+            }
 
         case .notification:
             if event.notification == "permission_prompt" {
@@ -122,6 +139,17 @@ public struct AgentSession: Identifiable, Equatable, Sendable {
         teamMembers[agentID]?.status = .working
         teamMembers[agentID]?.room = event.tool.map(Room.init(tool:)) ?? .desk
         teamMembers[agentID]?.lastActivity = event.timestamp
+    }
+
+    /// A team member asking for permission raises a hand; once the tool runs, it is back at work.
+    private mutating func applyTeamMemberPermission(_ event: AgentEvent) {
+        guard let agentID = event.agentID, teamMembers[agentID] != nil else { return }
+        teamMembers[agentID]?.lastActivity = event.timestamp
+        if event.kind == .permissionRequest {
+            teamMembers[agentID]?.status = .waiting
+        } else if teamMembers[agentID]?.status == .waiting {
+            teamMembers[agentID]?.status = .working
+        }
     }
 
     /// The status to show at the given time, applying the inactivity rule.

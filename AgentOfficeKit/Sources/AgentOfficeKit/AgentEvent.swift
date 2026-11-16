@@ -11,6 +11,10 @@ public struct AgentEvent: Codable, Equatable, Sendable {
         case sessionEnd = "SessionEnd"
         case userPromptSubmit = "UserPromptSubmit"
         case preToolUse = "PreToolUse"
+        /// Claude Code is about to ask the user to allow a tool.
+        case permissionRequest = "PermissionRequest"
+        /// A tool finished, so any permission question for it has been answered.
+        case postToolUse = "PostToolUse"
         case subagentStart = "SubagentStart"
         case subagentStop = "SubagentStop"
         case notification = "Notification"

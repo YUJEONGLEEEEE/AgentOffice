@@ -40,6 +40,32 @@ jobs:
           jq -e '.tool == "Bash" and .project == "Demo"' "$events/ci-1.jsonl"
           ! grep -q private "$events/ci-1.jsonl"
 
+      # The approval hook waits only while the app is open, and passes on the app's answer.
+      - name: Check approval hook
+        run: |
+          base="$RUNNER_TEMP/agentoffice"
+          mkdir -p "$base/Approvals" "$base/Events"
+          request='{"session_id":"ci-2","tool_name":"Bash","tool_input":{"command":"ls"},"cwd":"/tmp/Demo"}'
+          export AGENTOFFICE_DIR="$base" AGENTOFFICE_APPROVAL_WAIT=10
+          # App closed: no output, no waiting.
+          [ -z "$(echo "$request" | bash plugin/scripts/agentoffice-approval.sh)" ]
+          # App open and answering allow.
+          touch "$base/Approvals/.app-alive"
+          ( for _ in $(seq 20); do
+              file="$(ls "$base"/Approvals/*.request.json 2>/dev/null | head -n 1)"
+              if [ -n "$file" ]; then
+                id="$(jq -r .id "$file")"
+                echo "{\"id\":\"$id\",\"decision\":\"allow\"}" > "$base/Approvals/$id.answer.json"
+                break
+              fi
+              sleep 0.5
+            done ) &
+          output="$(echo "$request" | bash plugin/scripts/agentoffice-approval.sh)"
+          wait
+          echo "$output"
+          echo "$output" | jq -e '.hookSpecificOutput.decision.behavior == "allow"'
+          [ -z "$(ls "$base"/Approvals/*.json 2>/dev/null)" ]
+
       - name: Run package tests
         working-directory: AgentOfficeKit
         run: swift test

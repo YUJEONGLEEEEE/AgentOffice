@@ -1,6 +1,26 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ · team member" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · 팀원"
+          }
+        }
+      }
+    },
+    "%@ is waiting for your permission" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 직원이 허락을 기다려요"
+          }
+        }
+      }
+    },
     "%@ Setup Guide" : {
       "localizations" : {
         "ko" : {
@@ -11,14 +31,28 @@
         }
       }
     },
-    "%lld team members" : {
+    "%@ wants to use %@" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "팀원 %lld명"
+            "value" : "%1$@ 직원이 %2$@ 도구를 쓰려고 해요"
           }
-        },
+        }
+      }
+    },
+    "%lld more waiting" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld건 더 기다리는 중"
+          }
+        }
+      }
+    },
+    "%lld team members" : {
+      "localizations" : {
         "en" : {
           "variations" : {
             "plural" : {
@@ -35,6 +69,22 @@
                 }
               }
             }
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "팀원 %lld명"
+          }
+        }
+      }
+    },
+    "← Building" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "← 건물"
           }
         }
       }
@@ -60,6 +110,7 @@
       }
     },
     "AgentOffice reads only the folder you choose. Pick Events in ~/Library/Application Support/AgentOffice." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -69,7 +120,38 @@
         }
       }
     },
+    "AgentOffice uses only the folder you choose. Pick AgentOffice in ~/Library/Application Support. The app reads activity there and saves your answers to permission questions." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AgentOffice는 직접 고른 폴더만 써요. ~/Library/Application Support 안의 AgentOffice 폴더를 고르세요. 앱이 여기서 활동 기록을 읽고, 허락 요청에 대한 답을 저장해요."
+          }
+        }
+      }
+    },
+    "Allow" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "허락"
+          }
+        }
+      }
+    },
+    "Allow the AgentOffice folder" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AgentOffice 폴더 허락하기"
+          }
+        }
+      }
+    },
     "Allow the events folder" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -139,12 +221,12 @@
         }
       }
     },
-    "Choose the Events folder where Claude Code records its activity." : {
+    "Choose the AgentOffice folder. The app reads activity from it and saves your answers to permission questions there." : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Claude Code 기록이 쌓이는 Events 폴더를 선택하세요."
+            "value" : "AgentOffice 폴더를 고르세요. 앱이 이 폴더에서 활동 기록을 읽고, 허락 요청에 대한 답을 저장해요."
           }
         }
       }
@@ -155,6 +237,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "기록 폴더를 선택하면 사무실 현황이 보여요."
+          }
+        }
+      }
+    },
+    "Choose the Events folder where Claude Code records its activity." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claude Code 기록이 쌓이는 Events 폴더를 선택하세요."
           }
         }
       }
@@ -205,6 +298,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "명령어 복사하기"
+          }
+        }
+      }
+    },
+    "Deny" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "거절"
           }
         }
       }
@@ -275,6 +378,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "기타 가리기"
+          }
+        }
+      }
+    },
+    "iCloud sync failed · Trying again soon" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud 동기화 실패 · 잠시 후 다시 시도해요"
           }
         }
       }
@@ -355,6 +468,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Claude Code 세션을 새로 열거나 /reload-plugins를 실행하세요. 첫 기록이 남을 때 기록 폴더가 만들어져요."
+          }
+        }
+      }
+    },
+    "Permission questions show the command until you answer, then are deleted." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "허락 요청은 답할 때까지만 명령어를 보여 주고, 답하면 바로 지워요."
           }
         }
       }
@@ -459,6 +582,16 @@
         }
       }
     },
+    "To answer permission questions here, choose the AgentOffice folder that holds Events." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여기서 허락 요청에 답하려면 Events가 들어 있는 AgentOffice 폴더를 골라 주세요."
+          }
+        }
+      }
+    },
     "View" : {
       "localizations" : {
         "ko" : {
@@ -495,26 +628,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "확대/축소"
-          }
-        }
-      }
-    },
-    "iCloud sync failed · Trying again soon" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iCloud 동기화 실패 · 잠시 후 다시 시도해요"
-          }
-        }
-      }
-    },
-    "← Building" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "← 건물"
           }
         }
       }

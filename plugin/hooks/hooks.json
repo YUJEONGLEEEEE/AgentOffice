@@ -1,5 +1,5 @@
 {
-  "description": "Records an allow-list of event fields for the AgentOffice Mac app.",
+  "description": "Records an allow-list of event fields for the AgentOffice Mac app, and lets the app answer permission questions while it is open.",
   "hooks": {
     "SessionStart": [
       {
@@ -38,6 +38,35 @@
       }
     ],
     "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/agentoffice-event.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/agentoffice-event.sh\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/agentoffice-approval.sh\"",
+            "timeout": 330
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
       {
         "matcher": "*",
         "hooks": [
