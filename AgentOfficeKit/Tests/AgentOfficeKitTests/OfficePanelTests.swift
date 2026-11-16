@@ -30,6 +30,20 @@ struct FloorSummaryTests {
 
         #expect(floors.map(\.name) == ["Apple", "Zoo"])
     }
+
+    @Test func listPutsEmptyFloorsLast() {
+        let floors = FloorSummary.floors(from: [
+            agent("a1", floor: "Apple", status: .left, minutesAgo: 90),
+            agent("b1", floor: "Blog", status: .working, minutesAgo: 1),
+            agent("c1", floor: "Cafe", status: .left, minutesAgo: 120),
+            agent("d1", floor: "Docs", status: .resting, minutesAgo: 5),
+        ])
+
+        let list = FloorSummary.listOrder(floors)
+
+        #expect(list.map(\.name) == ["Blog", "Docs", "Apple", "Cafe"])
+        #expect(list.map(\.isEmpty) == [false, false, true, true])
+    }
 }
 
 struct ActivityEntryTests {

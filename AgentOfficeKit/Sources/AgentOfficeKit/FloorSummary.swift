@@ -26,4 +26,13 @@ public struct FloorSummary: Identifiable, Equatable, Sendable {
             }
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
+
+    /// Nobody on this floor is at work; everyone has gone home.
+    public var isEmpty: Bool { presentCount == 0 }
+
+    /// The order for the floor list: floors with people at work first, then empty floors, each by name.
+    /// The building keeps plain name order, so its floors never move.
+    public static func listOrder(_ floors: [FloorSummary]) -> [FloorSummary] {
+        floors.filter { !$0.isEmpty } + floors.filter(\.isEmpty)
+    }
 }

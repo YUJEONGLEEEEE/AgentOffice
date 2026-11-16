@@ -415,7 +415,8 @@ class ViewController: NSViewController {
         let now = Date.now
         office = SessionStore(folderURL: folderURL).load(now: now)
         snapshots = office.sessions.flatMap { $0.snapshots(at: now) }
-        floors = FloorSummary.floors(from: snapshots)
+        // Floors with people at work come first; empty floors wait at the bottom, faded.
+        floors = FloorSummary.listOrder(FloorSummary.floors(from: snapshots))
         updateFloor(now: now)
         cloudPublisher.update(snapshots, now: now)
     }
@@ -554,12 +555,14 @@ extension ViewController: NSTableViewDataSource, NSTableViewDelegate {
             let count = isAll ? floors.reduce(0) { $0 + $1.presentCount } : floors[row - 1].presentCount
             cell.titleField.stringValue = name
             cell.subtitleField.stringValue = count > 0 ? OfficeText.atWork(count) : OfficeText.emptyFloor
+            cell.alphaValue = !isAll && count == 0 ? 0.45 : 1
         } else {
             let entry = floorActivity[row]
             var parts = [entry.agentName, timeFormatter.string(from: entry.time)]
             if shownFloor == nil {
                 parts.insert(entry.floor, at: 1)
             }
+            cell.alphaValue = 1
             cell.titleField.stringValue = entry.summary
             cell.subtitleField.stringValue = parts.joined(separator: " · ")
         }
