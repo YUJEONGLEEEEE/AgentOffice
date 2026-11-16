@@ -45,4 +45,35 @@ struct OfficeCloudTests {
         #expect(agent().status(at: now.addingTimeInterval(60)) == .working)
         #expect(agent().status(at: now.addingTimeInterval(AgentSession.inactivityLimit)) == .left)
     }
+
+    // MARK: - Approvals
+
+    private func approval(agentID: String? = nil) -> ApprovalRequest {
+        ApprovalRequest(id: "a1b2-c3", sessionID: "eebe4d02", agentID: agentID, project: "AgentOffice",
+                        tool: "Bash", summary: "touch hello.txt", createdAt: now)
+    }
+
+    @Test func approvalRecordRoundTrip() throws {
+        let record = OfficeCloud.record(for: approval(agentID: "a1"))
+
+        #expect(try #require(OfficeCloud.approval(from: record)) == approval(agentID: "a1"))
+        #expect(record["agentName"] as? String == "eebe")
+    }
+
+    /// The command must never be stored as a plain field, only end-to-end encrypted.
+    @Test func approvalCommandIsOnlyEncrypted() {
+        let record = OfficeCloud.record(for: approval())
+
+        // allKeys() also lists encrypted fields; the plain value must still be missing.
+        #expect(Set(record.allKeys()).isSubset(of: Set(OfficeCloud.approvalFields + ["summary"])))
+        #expect(record["summary"] == nil)
+        #expect(record.encryptedValues["summary"] as? String == "touch hello.txt")
+    }
+
+    @Test func approvalRecordIsNotAnAgent() {
+        let record = OfficeCloud.record(for: approval())
+
+        #expect(OfficeCloud.snapshot(from: record) == nil)
+        #expect(OfficeCloud.approval(from: OfficeCloud.record(for: agent())) == nil)
+    }
 }

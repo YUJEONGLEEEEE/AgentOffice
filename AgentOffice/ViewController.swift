@@ -10,10 +10,13 @@ import SpriteKit
 import SwiftUI
 import AgentOfficeKit
 
-/// The iPhone office: the same floor as the Mac, read from iCloud. View only.
+/// The iPhone office: the same floor as the Mac, read from iCloud.
+/// The only thing it changes is the answer to a permission question.
 class ViewController: UIViewController {
 
     private static let refreshInterval: TimeInterval = 10
+    /// While a question is waiting, the office loads more often, so an answer in the terminal clears it soon.
+    private static let approvalRefreshInterval: TimeInterval = 3
     /// The Mac sends a heartbeat every minute. Longer silence means it is off or asleep.
     private static let offlineAfter: TimeInterval = 150
 
@@ -25,6 +28,16 @@ class ViewController: UIViewController {
     private var shownAgents: [AgentSnapshot] = []
     private var refreshTimer: Timer?
     private var isLoading = false
+    private var lastLoad = Date.distantPast
+
+    private let approvalModel = ApprovalPanelModel()
+    /// Permission questions from Claude Code, above the office while any are waiting.
+    private lazy var approvalHost: UIHostingController<ApprovalPanelView> = {
+        let host = UIHostingController(rootView: ApprovalPanelView(model: approvalModel))
+        host.sizingOptions = [.intrinsicContentSize]
+        host.view.backgroundColor = .clear
+        return host
+    }()
 
     private let statusLabel = UILabel()
     private let officeView = SKView()
@@ -63,6 +76,14 @@ class ViewController: UIViewController {
                                                name: UIApplication.didBecomeActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(appWillResignActive),
                                                name: UIApplication.willResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(pullToRefresh),
+                                               name: .approvalsChanged, object: nil)
+        approvalModel.answer = { [weak self] request, decision in
+            guard let self else { return }
+            // Hide it right away; the Mac passes the answer on within a few seconds.
+            self.approvalModel.requests.removeAll { $0.id == request.id }
+            Task { await PhoneApprovals.shared.answer(approvalID: request.id, with: decision) }
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -91,6 +112,7 @@ class ViewController: UIViewController {
             }
         }
 
+        addChild(approvalHost)
         addChild(floorHost)
         floorHost.view.backgroundColor = .clear
         floorHost.view.layer.cornerRadius = 10
@@ -127,7 +149,7 @@ class ViewController: UIViewController {
         messageLabel.numberOfLines = 0
         messageLabel.text = String(localized: "Loading…")
 
-        for subview: UIView in [statusLabel, officeView, floorHost.view, backToBuildingButton, tableView, messageLabel] {
+        for subview: UIView in [statusLabel, approvalHost.view, officeView, floorHost.view, backToBuildingButton, tableView, messageLabel] {
             subview.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(subview)
         }
@@ -139,7 +161,11 @@ class ViewController: UIViewController {
             statusLabel.leadingAnchor.constraint(equalTo: guide.leadingAnchor, constant: 20),
             statusLabel.trailingAnchor.constraint(equalTo: guide.trailingAnchor, constant: -20),
 
-            officeView.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 8),
+            approvalHost.view.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 4),
+            approvalHost.view.leadingAnchor.constraint(equalTo: guide.leadingAnchor, constant: 6),
+            approvalHost.view.trailingAnchor.constraint(equalTo: guide.trailingAnchor, constant: -6),
+
+            officeView.topAnchor.constraint(equalTo: approvalHost.view.bottomAnchor, constant: 4),
             officeView.leadingAnchor.constraint(equalTo: guide.leadingAnchor, constant: 16),
             officeView.trailingAnchor.constraint(equalTo: guide.trailingAnchor, constant: -16),
 
@@ -160,6 +186,7 @@ class ViewController: UIViewController {
             messageLabel.leadingAnchor.constraint(equalTo: guide.leadingAnchor, constant: 32),
             messageLabel.trailingAnchor.constraint(equalTo: guide.trailingAnchor, constant: -32),
         ])
+        approvalHost.didMove(toParent: self)
         floorHost.didMove(toParent: self)
         setOfficeHeight(ratio: layout.size.height / layout.size.width)
     }
@@ -221,9 +248,13 @@ class ViewController: UIViewController {
     private func startRefreshing() {
         load()
         refreshTimer?.invalidate()
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: Self.refreshInterval, repeats: true) { [weak self] _ in
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: Self.approvalRefreshInterval, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
-                self?.load()
+                guard let self else { return }
+                let interval = self.approvalModel.requests.isEmpty ? Self.refreshInterval : Self.approvalRefreshInterval
+                if Date.now.timeIntervalSince(self.lastLoad) >= interval - 0.5 {
+                    self.load()
+                }
             }
         }
     }
@@ -231,11 +262,16 @@ class ViewController: UIViewController {
     private func load() {
         guard !isLoading else { return }
         isLoading = true
+        lastLoad = .now
         Task {
             do {
                 let office = try await cloud.fetch()
                 agents = office.agents
                 lastUpdated = office.lastUpdated
+                // Questions from a Mac that went offline can no longer be passed on.
+                let macIsOnline = office.lastUpdated.map { Date.now.timeIntervalSince($0) <= Self.offlineAfter } ?? false
+                approvalModel.requests = macIsOnline ? office.approvals : []
+                PhoneApprovals.shared.prepare()
                 messageLabel.text = agents.isEmpty ? String(localized: "No one is in the office yet.\nOpen AgentOffice on your Mac.") : nil
             } catch OfficeCloud.CloudError.accountUnavailable {
                 messageLabel.text = String(localized: "Sign in to iCloud in Settings\nto see the office on your Mac.")

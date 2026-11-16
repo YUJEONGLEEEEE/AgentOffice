@@ -1,26 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "%@ · team member" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · 팀원"
-          }
-        }
-      }
-    },
-    "%@ is waiting for your permission" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ 직원이 허락을 기다려요"
-          }
-        }
-      }
-    },
     "%@ Setup Guide" : {
       "localizations" : {
         "ko" : {
@@ -31,22 +11,12 @@
         }
       }
     },
-    "%@ wants to use %@" : {
+    "%@ is waiting for your permission" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%1$@ 직원이 %2$@ 도구를 쓰려고 해요"
-          }
-        }
-      }
-    },
-    "%lld more waiting" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld건 더 기다리는 중"
+            "value" : "%@ 직원이 허락을 기다려요"
           }
         }
       }
@@ -75,16 +45,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "팀원 %lld명"
-          }
-        }
-      }
-    },
-    "← Building" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "← 건물"
           }
         }
       }
@@ -231,16 +191,6 @@
         }
       }
     },
-    "Choose the events folder to see the office." : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "기록 폴더를 선택하면 사무실 현황이 보여요."
-          }
-        }
-      }
-    },
     "Choose the Events folder where Claude Code records its activity." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -248,6 +198,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Claude Code 기록이 쌓이는 Events 폴더를 선택하세요."
+          }
+        }
+      }
+    },
+    "Choose the events folder to see the office." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록 폴더를 선택하면 사무실 현황이 보여요."
           }
         }
       }
@@ -378,16 +338,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "기타 가리기"
-          }
-        }
-      }
-    },
-    "iCloud sync failed · Trying again soon" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iCloud 동기화 실패 · 잠시 후 다시 시도해요"
           }
         }
       }
@@ -628,6 +578,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "확대/축소"
+          }
+        }
+      }
+    },
+    "iCloud sync failed · Trying again soon" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud 동기화 실패 · 잠시 후 다시 시도해요"
+          }
+        }
+      }
+    },
+    "← Building" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "← 건물"
           }
         }
       }

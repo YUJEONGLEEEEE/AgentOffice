@@ -2,23 +2,20 @@ import AppKit
 import AgentOfficeKit
 import UserNotifications
 
-/// The open permission questions, for the panel above the office.
-@MainActor
-@Observable
-final class ApprovalPanelModel {
-    var requests: [ApprovalRequest] = []
-    var answer: (ApprovalRequest, ApprovalDecision) -> Void = { _, _ in }
-}
-
 /// Lets the user answer Claude Code's permission questions from the app.
 ///
 /// While the app is open it marks itself alive, so the approval hook waits for an answer.
-/// Each question shows in the panel and as a notification with Allow and Deny buttons.
+/// Each question shows in the panel and as a notification with Allow and Deny buttons,
+/// and goes to iCloud so the iPhone can answer it too.
 /// The terminal question stays open the whole time; whichever answers first wins.
 @MainActor
 final class ApprovalCenter: NSObject {
 
     private static let refreshInterval: TimeInterval = 1
+    /// How often iCloud is checked for answers from the iPhone while a question is open.
+    private static let cloudInterval: TimeInterval = 3
+    /// After a failure (no iCloud account, no network), iCloud is tried again after this long.
+    private static let cloudRetryDelay: TimeInterval = 30
     private static let categoryID = "approval"
     private static let allowActionID = "allow"
     private static let denyActionID = "deny"
@@ -31,6 +28,12 @@ final class ApprovalCenter: NSObject {
     private var timer: Timer?
     private var notifiedIDs: Set<String> = []
     private var askedForNotifications = false
+
+    private let cloud = OfficeCloud()
+    /// The questions iCloud has. `nil` until the first sync, which also clears questions left by an earlier run.
+    private var cloudIDs: Set<String>?
+    private var lastCloudSync = Date.distantPast
+    private var isSyncingCloud = false
 
     override init() {
         super.init()
@@ -74,6 +77,33 @@ final class ApprovalCenter: NSObject {
         guard let folder else { return }
         try? folder.markAlive()
         update(folder.requests())
+        syncCloud()
+    }
+
+    /// Sends new questions to iCloud, removes answered ones, and applies answers given on the iPhone.
+    private func syncCloud(now: Date = .now) {
+        guard !isSyncingCloud else { return }
+        let requests = model.requests
+        let ids = Set(requests.map(\.id))
+        let elapsed = now.timeIntervalSince(lastCloudSync)
+        guard elapsed >= 0, ids != cloudIDs || (!ids.isEmpty && elapsed >= Self.cloudInterval) else { return }
+
+        isSyncingCloud = true
+        lastCloudSync = now
+        Task {
+            guard let answers = try? await cloud.syncApprovals(requests) else {
+                lastCloudSync = .now.addingTimeInterval(Self.cloudRetryDelay)
+                isSyncingCloud = false
+                return
+            }
+            cloudIDs = ids
+            isSyncingCloud = false
+            for (id, decision) in answers {
+                if let request = model.requests.first(where: { $0.id == id }) {
+                    answer(request, with: decision)
+                }
+            }
+        }
     }
 
     private func update(_ requests: [ApprovalRequest]) {
