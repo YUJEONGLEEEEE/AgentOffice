@@ -1,12 +1,33 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%1$@ wants to use %2$@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ 직원이 %2$@ 도구를 쓰려고 해요"
+          }
+        }
+      }
+    },
     "%lld at work · Updated %@" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld명 근무 중 · %@ 업데이트"
+          }
+        }
+      }
+    },
+    "Allow" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "허락"
           }
         }
       }
@@ -27,6 +48,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "사무실 정보를 불러오지 못했어요.\n잠시 후 다시 시도해요."
+          }
+        }
+      }
+    },
+    "Deny" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "거절"
           }
         }
       }
@@ -67,6 +98,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "아직 직원 정보가 없어요.\nMac에서 AgentOffice를 켜 주세요."
+          }
+        }
+      }
+    },
+    "Permission needed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "허락이 필요해요"
           }
         }
       }
