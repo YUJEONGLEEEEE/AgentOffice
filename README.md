@@ -58,9 +58,10 @@ AgentOffice is built to show *what kind of work* is happening, never the work it
 - Prompts, tool inputs, command text, file contents and full paths are **never** recorded.
 - Permission questions are the one exception: while a question is open, it shows the command or file it is about, so you can decide safely. It is readable only by you and deleted as soon as it is answered. To reach the iPhone, the command is stored end-to-end encrypted in your private iCloud database, so not even Apple can read it; the notification itself names only the employee and the tool.
 - Event files stay on your Mac, readable only by you (`600`).
-- iCloud receives only each employee's name, floor, room, status, role and last activity time, in your private database.
+- iCloud receives only each employee's name, floor, room, status, role and last activity time, and open permission questions with the command end-to-end encrypted, in your private database.
 - The Mac app runs in the App Sandbox and uses only the folder you choose.
-- The iPhone app cannot send anything back to your Mac.
+- The iPhone app sends back only your Allow or Deny answers.
+- Full details: [Privacy Policy](https://yujeongleeeee.github.io/AgentOffice/privacy).
 
 ## Requirements
 
