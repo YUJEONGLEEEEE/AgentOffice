@@ -48,6 +48,13 @@ case "$session" in
 esac
 agent="$(printf '%s' "$input" | jq -r '.agent_id // empty' 2>/dev/null)"
 
+# Some prompts are not about running a tool: a question with choices, or a plan to approve.
+# Allow or Deny cannot answer them, so they stay in the terminal only.
+tool="$(printf '%s' "$input" | jq -r '.tool_name // empty' 2>/dev/null)"
+case "$tool" in
+  AskUserQuestion | ExitPlanMode) exit 0 ;;
+esac
+
 id="$(uuidgen 2>/dev/null | tr 'A-Z' 'a-z')"
 case "$id" in
   "" | *[!a-f0-9-]*) exit 0 ;;

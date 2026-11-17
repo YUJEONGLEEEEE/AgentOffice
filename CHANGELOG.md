@@ -5,6 +5,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Fixed
+- Questions with choices and plans to approve stay in the terminal, instead of showing Allow and Deny in the app (plugin 1.1.1)
+
 ## [1.1.0] - 2026-11-17
 
 ### Added
