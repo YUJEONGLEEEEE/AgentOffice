@@ -42,10 +42,6 @@ iPhone에서 사무실을 보여 주기 위해 Mac 앱은 **사용자의 비공�
 - **Mac과 iPhone: 알림.** 허락 요청을 알려 주기 위해 사용하며, 설정에서 언제든 끌 수 있습니다.
 - **iCloud.** Mac과 iPhone 사이에서 사무실을 동기화합니다. iCloud 없이도 Mac 앱은 단독으로 작동합니다.
 
-## 데모 사무실
-
-데모 사무실은 기기 안에서 만들어 내는 가상의 내용입니다. 저장하거나 iCloud로 보내거나 Claude Code에 전달하지 않으며, 데모의 허락 요청에 답해도 아무것도 실행되지 않습니다.
-
 ## 충돌 보고서
 
 사용자가 기기 설정에서 앱 개발자와 충돌 보고서나 분석 정보를 공유하도록 선택하면, Apple이 개발자에게 익명의 충돌 보고서를 보낼 수 있습니다. 이는 AgentOffice가 아니라 Apple과 사용자가 관리합니다.
@@ -55,16 +51,13 @@ iPhone에서 사무실을 보여 주기 위해 Mac 앱은 **사용자의 비공�
 - **Mac:** `~/Library/Application Support/AgentOffice` 폴더를 삭제합니다. 기록을 멈추려면 Claude Code에서 플러그인을 제거합니다.
 - **iCloud:** iPhone의 설정 앱에서 이름을 누르고 **iCloud**로 들어가 AgentOffice의 저장 공간을 관리합니다. iCloud의 데이터는 사무실 상태가 바뀔 때마다 새 내용으로 바뀝니다.
 
-## 아동
-
-AgentOffice는 소프트웨어 개발자를 위한 도구이며 아동을 대상으로 하지 않습니다.
-
 ## 변경
 
 이 방침이 바뀌면 새 시행일과 함께 이 페이지에 게시합니다. 모든 변경 기록은 [프로젝트 저장소](https://github.com/YUJEONGLEEEEE/AgentOffice/commits/main/docs/privacy-ko.md)에 공개되어 있습니다.
 
 ## 문의
 
-개인정보 관련 문의는 [github.com/YUJEONGLEEEEE/AgentOffice/issues](https://github.com/YUJEONGLEEEEE/AgentOffice/issues)에 이슈를 남겨 주세요.
+개인정보에 관한 질문이나 요청은 아래로 연락해 주세요.
 
-AgentOffice는 독립 프로젝트이며 Anthropic과 제휴하거나 Anthropic의 보증을 받지 않았습니다.
+- **이유정**, [aspynlee.dev@gmail.com](mailto:aspynlee.dev@gmail.com)
+- 공개적으로 남겨도 되는 문의는 [GitHub 이슈](https://github.com/YUJEONGLEEEEE/AgentOffice/issues)로도 받습니다.
