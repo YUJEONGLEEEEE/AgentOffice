@@ -10,6 +10,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ### Added
 - Answer Claude Code's permission questions from the Mac app: a panel above the office and notifications with Allow and Deny
 - Answer permission questions on the iPhone too, in the app or from the notification. The command is end-to-end encrypted in iCloud
+- A notification status screen on the iPhone (floor menu), to see why a notification does not arrive
 - The plugin records permission questions and finished tools, so a raised hand goes down as soon as the question is answered
 
 ### Changed
