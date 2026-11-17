@@ -49,6 +49,10 @@ jobs:
           export AGENTOFFICE_DIR="$base" AGENTOFFICE_APPROVAL_WAIT=10
           # App closed: no output, no waiting.
           [ -z "$(echo "$request" | bash plugin/scripts/agentoffice-approval.sh)" ]
+          # A question with choices stays in the terminal, even while the app is open.
+          touch "$base/Approvals/.app-alive"
+          [ -z "$(echo '{"session_id":"ci-3","tool_name":"AskUserQuestion","tool_input":{}}' | bash plugin/scripts/agentoffice-approval.sh)" ]
+          [ -z "$(ls "$base"/Approvals/*.json 2>/dev/null)" ]
           # App open and answering allow.
           touch "$base/Approvals/.app-alive"
           ( for _ in $(seq 20); do
