@@ -141,32 +141,38 @@ final class PhoneApprovals: NSObject {
 
 extension PhoneApprovals: UNUserNotificationCenterDelegate {
 
+    // These use completion handlers, called on the main thread. iOS stops the app if they are called
+    // from another thread, which the async versions of these methods can do.
+
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                            didReceive response: UNNotificationResponse) async {
+                                            didReceive response: UNNotificationResponse,
+                                            withCompletionHandler completionHandler: @escaping () -> Void) {
         let actionID = response.actionIdentifier
         let approvalID = Self.approvalID(in: response.notification.request.content.userInfo)
         Self.log.notice("Notification answered: \(actionID, privacy: .public)")
-        // Answer before returning: from the lock screen, the app may be suspended right after.
-        switch (actionID, approvalID) {
-        case (ApprovalNotification.allowActionID, let id?):
-            await answer(approvalID: id, with: .allow)
-        case (ApprovalNotification.denyActionID, let id?):
-            await answer(approvalID: id, with: .deny)
-        default:
-            // Tapping the notification opens the app, where the question is waiting.
-            await MainActor.run {
+        Task { @MainActor in
+            // Answer before finishing: from the lock screen, the app may be suspended right after.
+            switch (actionID, approvalID) {
+            case (ApprovalNotification.allowActionID, let id?):
+                await answer(approvalID: id, with: .allow)
+            case (ApprovalNotification.denyActionID, let id?):
+                await answer(approvalID: id, with: .deny)
+            default:
+                // Tapping the notification opens the app, where the question is waiting.
                 NotificationCenter.default.post(name: .approvalsChanged, object: nil)
             }
+            completionHandler()
         }
     }
 
     /// The panel shows the question while the app is open, so no banner; just load it.
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                            willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
+                                            willPresent notification: UNNotification,
+                                            withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         Self.log.notice("Notification arrived while the app is open")
-        await MainActor.run {
+        Task { @MainActor in
             NotificationCenter.default.post(name: .approvalsChanged, object: nil)
+            completionHandler([])
         }
-        return []
     }
 }

@@ -78,11 +78,25 @@ public actor OfficeCloud {
     /// Puts new permission questions in iCloud, removes answered ones,
     /// and returns the answers given on the iPhone, by question ID.
     public func syncApprovals(_ requests: [ApprovalRequest]) async throws -> [String: ApprovalDecision] {
+        // Someone is waiting on these, so CloudKit should not put them off.
+        try await database.configuredWith(configuration: Self.waitingConfiguration()) { database in
+            try await self.syncApprovals(requests, in: database)
+        }
+    }
+
+    /// Settings for work a person is waiting on. CloudKit may delay lower-priority work by many seconds.
+    static func waitingConfiguration() -> CKOperation.Configuration {
+        let configuration = CKOperation.Configuration()
+        configuration.qualityOfService = .userInitiated
+        return configuration
+    }
+
+    private func syncApprovals(_ requests: [ApprovalRequest], in database: CKDatabase) async throws -> [String: ApprovalDecision] {
         try await ensureAccount()
         try await ensureZone()
         if uploadedApprovalIDs == nil {
             // Questions left by a run that quit before they were answered are removed below.
-            uploadedApprovalIDs = Set(try await zoneRecords().filter { $0.recordType == Self.approvalRecordType }
+            uploadedApprovalIDs = Set(try await zoneRecords(in: database).filter { $0.recordType == Self.approvalRecordType }
                 .map(\.recordID.recordName))
         }
         let uploaded = uploadedApprovalIDs ?? []
@@ -93,7 +107,7 @@ public actor OfficeCloud {
         if !new.isEmpty || !gone.isEmpty {
             // A question that is already there (saved by a sync that failed halfway) counts as uploaded.
             try await modify(saving: new, deleting: gone, savePolicy: .ifServerRecordUnchanged,
-                             ignoring: [.serverRecordChanged])
+                             ignoring: [.serverRecordChanged], in: database)
         }
         uploadedApprovalIDs = openIDs
         guard !openIDs.isEmpty else { return [:] }
@@ -138,6 +152,12 @@ public actor OfficeCloud {
 
     /// Sends the user's answer to the Mac. Does nothing if the question was already answered elsewhere.
     public func answer(approvalID: String, with decision: ApprovalDecision) async throws {
+        try await database.configuredWith(configuration: Self.waitingConfiguration()) { database in
+            try await self.answer(approvalID: approvalID, with: decision, in: database)
+        }
+    }
+
+    private func answer(approvalID: String, with decision: ApprovalDecision, in database: CKDatabase) async throws {
         try await ensureAccount()
         let id = CKRecord.ID(recordName: approvalID, zoneID: Self.zoneID)
         let record: CKRecord
@@ -150,7 +170,7 @@ public actor OfficeCloud {
         record["decision"] = decision.rawValue
         // Answered in the terminal or on the Mac at the same moment: that answer stands.
         try await modify(saving: [record], deleting: [], savePolicy: .ifServerRecordUnchanged,
-                         ignoring: [.serverRecordChanged, .unknownItem])
+                         ignoring: [.serverRecordChanged, .unknownItem], in: database)
     }
 
     /// Whether iCloud has this user's sign-up for new questions, for the notification status screen.
@@ -201,7 +221,8 @@ public actor OfficeCloud {
     /// `modifyRecords` reports each record's failure in its results instead of throwing, so they are checked here.
     private func modify(saving: [CKRecord], deleting: [CKRecord.ID],
                         savePolicy: CKModifyRecordsOperation.RecordSavePolicy,
-                        ignoring ignored: Set<CKError.Code> = []) async throws {
+                        ignoring ignored: Set<CKError.Code> = [], in database: CKDatabase? = nil) async throws {
+        let database = database ?? self.database
         let (saveResults, deleteResults) = try await database.modifyRecords(saving: saving, deleting: deleting,
                                                                              savePolicy: savePolicy)
         // A record that is already gone is what deleting wanted anyway.
@@ -219,7 +240,8 @@ public actor OfficeCloud {
     }
 
     /// Every record in the office zone.
-    private func zoneRecords() async throws -> [CKRecord] {
+    private func zoneRecords(in database: CKDatabase? = nil) async throws -> [CKRecord] {
+        let database = database ?? self.database
         var records: [CKRecord] = []
         var token: CKServerChangeToken?
         var moreComing = true
