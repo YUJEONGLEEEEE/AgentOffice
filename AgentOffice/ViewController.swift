@@ -29,6 +29,10 @@ class ViewController: UIViewController {
     private var refreshTimer: Timer?
     private var isLoading = false
     private var lastLoad = Date.distantPast
+    /// Shows a made-up office, for trying the app without a Mac and for App Review.
+    private var isDemo = false
+    private var answeredDemoIDs: Set<String> = []
+    private let demoButton = UIButton(configuration: .borderedProminent())
 
     private let approvalModel = ApprovalPanelModel()
     /// Permission questions from Claude Code, above the office while any are waiting.
@@ -82,6 +86,11 @@ class ViewController: UIViewController {
             guard let self else { return }
             // Hide it right away; the Mac passes the answer on within a few seconds.
             self.approvalModel.requests.removeAll { $0.id == request.id }
+            // The demo's question runs nothing and goes nowhere.
+            if DemoOffice.isDemo(request) {
+                self.answeredDemoIDs.insert(request.id)
+                return
+            }
             Task { await PhoneApprovals.shared.answer(approvalID: request.id, with: decision) }
         }
     }
@@ -151,7 +160,11 @@ class ViewController: UIViewController {
         messageLabel.numberOfLines = 0
         messageLabel.text = String(localized: "Loading…")
 
-        for subview: UIView in [statusLabel, approvalHost.view, officeView, floorHost.view, backToBuildingButton, tableView, messageLabel] {
+        demoButton.configuration?.title = String(localized: "Try Demo")
+        demoButton.addAction(UIAction { [weak self] _ in self?.setDemo(true) }, for: .primaryActionTriggered)
+        demoButton.isHidden = true
+
+        for subview: UIView in [statusLabel, approvalHost.view, officeView, floorHost.view, backToBuildingButton, tableView, messageLabel, demoButton] {
             subview.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(subview)
         }
@@ -185,6 +198,8 @@ class ViewController: UIViewController {
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
             messageLabel.centerYAnchor.constraint(equalTo: tableView.centerYAnchor),
+            demoButton.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 16),
+            demoButton.centerXAnchor.constraint(equalTo: messageLabel.centerXAnchor),
             messageLabel.leadingAnchor.constraint(equalTo: guide.leadingAnchor, constant: 32),
             messageLabel.trailingAnchor.constraint(equalTo: guide.trailingAnchor, constant: -32),
         ])
@@ -226,10 +241,15 @@ class ViewController: UIViewController {
         let status = UIAction(title: String(localized: "Notification Status"), image: UIImage(systemName: "bell.badge")) { [weak self] _ in
             self?.showNotificationStatus()
         }
+        let demo = UIAction(title: String(localized: "Demo Office"), image: UIImage(systemName: "play.rectangle"),
+                            state: isDemo ? .on : .off) { [weak self] _ in
+            guard let self else { return }
+            setDemo(!isDemo)
+        }
         let menu = UIMenu(title: String(localized: "Floors"), children: [
             all,
             UIMenu(options: .displayInline, children: floorActions),
-            UIMenu(options: .displayInline, children: [status]),
+            UIMenu(options: .displayInline, children: [demo, status]),
         ])
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: String(localized: "Floors"), image: UIImage(systemName: "building.2"), menu: menu)
     }
@@ -243,6 +263,18 @@ class ViewController: UIViewController {
             alert.addAction(UIAlertAction(title: String(localized: "OK"), style: .default))
             present(alert, animated: true)
         }
+    }
+
+    /// Turns the demo office on or off. The demo never reads or writes iCloud.
+    private func setDemo(_ on: Bool) {
+        isDemo = on
+        chosenFloor = nil
+        agents = []
+        lastUpdated = nil
+        approvalModel.requests = []
+        messageLabel.text = on ? nil : String(localized: "Loading…")
+        isLoading = false
+        load()
     }
 
     private func choose(floor: String?) {
@@ -272,7 +304,8 @@ class ViewController: UIViewController {
         refreshTimer = Timer.scheduledTimer(withTimeInterval: Self.approvalRefreshInterval, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
-                let interval = self.approvalModel.requests.isEmpty ? Self.refreshInterval : Self.approvalRefreshInterval
+                // The demo and open questions refresh often, so people move and answers clear quickly.
+                let interval = self.approvalModel.requests.isEmpty && !self.isDemo ? Self.refreshInterval : Self.approvalRefreshInterval
                 if Date.now.timeIntervalSince(self.lastLoad) >= interval - 0.5 {
                     self.load()
                 }
@@ -281,26 +314,49 @@ class ViewController: UIViewController {
     }
 
     private func load() {
+        if isDemo {
+            let now = Date.now
+            let demo = DemoOffice.state(at: now)
+            lastLoad = now
+            agents = demo.snapshots(at: now)
+            lastUpdated = now
+            approvalModel.requests = demo.approval.map { answeredDemoIDs.contains($0.id) ? [] : [$0] } ?? []
+            messageLabel.text = nil
+            tableView.refreshControl?.endRefreshing()
+            showOffice()
+            return
+        }
         guard !isLoading else { return }
         isLoading = true
         lastLoad = .now
         Task {
-            do {
-                let office = try await cloud.fetch()
-                agents = office.agents
-                lastUpdated = office.lastUpdated
-                // Questions from a Mac that went offline can no longer be passed on.
-                let macIsOnline = office.lastUpdated.map { Date.now.timeIntervalSince($0) <= Self.offlineAfter } ?? false
-                approvalModel.requests = macIsOnline ? office.approvals : []
-                await PhoneApprovals.shared.removeNotifications(except: Set(approvalModel.requests.map(\.id)))
-                messageLabel.text = agents.isEmpty ? String(localized: "No one is in the office yet.\nOpen AgentOffice on your Mac.") : nil
-            } catch OfficeCloud.CloudError.accountUnavailable {
-                messageLabel.text = String(localized: "Sign in to iCloud in Settings\nto see the office on your Mac.")
-            } catch {
-                messageLabel.text = agents.isEmpty ? String(localized: "Couldn’t load the office.\nTrying again soon.") : nil
+            defer {
+                isLoading = false
+                tableView.refreshControl?.endRefreshing()
             }
-            isLoading = false
-            tableView.refreshControl?.endRefreshing()
+            let office: OfficeCloud.Office
+            do {
+                office = try await cloud.fetch()
+            } catch OfficeCloud.CloudError.accountUnavailable {
+                guard !isDemo else { return }
+                messageLabel.text = String(localized: "Sign in to iCloud in Settings\nto see the office on your Mac.")
+                showOffice()
+                return
+            } catch {
+                guard !isDemo else { return }
+                messageLabel.text = agents.isEmpty ? String(localized: "Couldn’t load the office.\nTrying again soon.") : nil
+                showOffice()
+                return
+            }
+            // The demo was turned on while iCloud was loading; keep showing the demo.
+            guard !isDemo else { return }
+            agents = office.agents
+            lastUpdated = office.lastUpdated
+            // Questions from a Mac that went offline can no longer be passed on.
+            let macIsOnline = office.lastUpdated.map { Date.now.timeIntervalSince($0) <= Self.offlineAfter } ?? false
+            approvalModel.requests = macIsOnline ? office.approvals : []
+            await PhoneApprovals.shared.removeNotifications(except: Set(approvalModel.requests.map(\.id)))
+            messageLabel.text = agents.isEmpty ? String(localized: "No one is in the office yet.\nOpen AgentOffice on your Mac.") : nil
             showOffice()
         }
     }
@@ -331,6 +387,7 @@ class ViewController: UIViewController {
         updateFloorMenu()
         tableView.reloadData()
         messageLabel.isHidden = messageLabel.text == nil || !shownAgents.isEmpty
+        demoButton.isHidden = messageLabel.isHidden || isDemo
     }
 
     /// Shows the floor plan, the building or one floor in 3D, depending on the view style and the floor.
@@ -375,6 +432,11 @@ class ViewController: UIViewController {
 
     private func updateStatusLabel(now: Date) {
         let working = shownAgents.filter { $0.status != .left && $0.status != .idle }.count
+        if isDemo {
+            statusLabel.text = String(localized: "Demo office · Made-up work, nothing is sent anywhere")
+            statusLabel.textColor = .systemIndigo
+            return
+        }
         guard let lastUpdated else {
             statusLabel.text = nil
             return

@@ -58,6 +58,8 @@ enum MainMenu {
         menu.addItem(withTitle: OfficeViewStyle.flat.title, action: #selector(AppDelegate.showFlatOffice(_:)), keyEquivalent: "1")
         menu.addItem(withTitle: OfficeViewStyle.building.title, action: #selector(AppDelegate.showBuilding(_:)), keyEquivalent: "2")
         menu.addItem(.separator())
+        menu.addItem(withTitle: String(localized: "Demo Office"), action: #selector(AppDelegate.toggleDemo(_:)), keyEquivalent: "")
+        menu.addItem(.separator())
         return menu
     }
 

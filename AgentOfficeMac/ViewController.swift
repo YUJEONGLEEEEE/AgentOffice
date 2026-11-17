@@ -62,6 +62,10 @@ class ViewController: NSViewController {
     private let cardStack = NSStackView()
     private var cardViews: [String: AgentCardView] = [:]
     private let emptyStateLabel = NSTextField(labelWithString: "")
+    /// Shows a made-up office, for trying the app before Claude Code is set up.
+    private(set) var isDemo = false
+    private let demoButton = NSButton(title: String(localized: "Try Demo"), target: nil, action: nil)
+    private let emptyDemoButton = NSButton(title: String(localized: "Try Demo"), target: nil, action: nil)
 
     private let relativeFormatter: RelativeDateTimeFormatter = {
         let formatter = RelativeDateTimeFormatter()
@@ -137,6 +141,13 @@ class ViewController: NSViewController {
             styleSwitch.setWidth(44, forSegment: index)
         }
         styleSwitch.selectedSegment = OfficeViewStyle.allCases.firstIndex(of: viewStyle) ?? 0
+
+        for button in [demoButton, emptyDemoButton] {
+            button.target = self
+            button.action = #selector(toggleDemo(_:))
+            button.bezelStyle = .push
+        }
+        emptyDemoButton.keyEquivalent = "\r"
 
         syncLabel.textColor = .secondaryLabelColor
         syncLabel.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
@@ -279,7 +290,7 @@ class ViewController: NSViewController {
     private func layOut(floorPanel: NSView, activityPanel: NSView, cardScroll: NSScrollView) {
         let spacer = NSView()
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        let header = NSStackView(views: [folderLabel, chooseFolderButton, spacer, styleSwitch, syncLabel])
+        let header = NSStackView(views: [folderLabel, chooseFolderButton, demoButton, spacer, styleSwitch, syncLabel])
         header.orientation = .horizontal
         header.spacing = 12
 
@@ -288,7 +299,7 @@ class ViewController: NSViewController {
         view.addLayoutGuide(officeArea)
 
         floorView.isHidden = true
-        for subview in [header, floorPanel, officeView, floorView, activityPanel, cardScroll, emptyStateLabel, backToBuildingButton, approvalPanel] {
+        for subview in [header, floorPanel, officeView, floorView, activityPanel, cardScroll, emptyStateLabel, emptyDemoButton, backToBuildingButton, approvalPanel] {
             subview.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(subview)
         }
@@ -353,6 +364,8 @@ class ViewController: NSViewController {
 
             emptyStateLabel.centerXAnchor.constraint(equalTo: officeView.centerXAnchor),
             emptyStateLabel.centerYAnchor.constraint(equalTo: officeView.centerYAnchor),
+            emptyDemoButton.topAnchor.constraint(equalTo: emptyStateLabel.bottomAnchor, constant: 12),
+            emptyDemoButton.centerXAnchor.constraint(equalTo: emptyStateLabel.centerXAnchor),
         ])
     }
 
@@ -378,6 +391,31 @@ class ViewController: NSViewController {
     private func updateSetupState() {
         setupState.folderName = folderAccess.folderURL?.lastPathComponent
         setupState.choseOnlyEvents = folderAccess.choseOnlyEvents
+    }
+
+    // MARK: - Demo
+
+    /// The header button, the button on the empty office, and View > Demo Office.
+    @objc func toggleDemo(_ sender: Any?) {
+        isDemo.toggle()
+        // The demo has its own floors, so start from the whole office with nobody walking in.
+        chosenFloor = nil
+        officeScene.removeAllAgents()
+        cardViews.removeAll()
+        if !isDemo {
+            approvals.showDemo(nil)
+            office = SessionStore.Office()
+            snapshots = []
+            floors = []
+        }
+        updateFolderUI()
+        if isDemo || folderAccess.eventsURL != nil {
+            reload()
+            startRefreshing()
+        } else {
+            refreshTimer?.invalidate()
+            updateFloor(now: .now)
+        }
     }
 
     // MARK: - Setup guide
@@ -411,7 +449,12 @@ class ViewController: NSViewController {
     }
 
     private func updateFolderUI() {
-        if let url = folderAccess.folderURL {
+        demoButton.title = isDemo ? String(localized: "Exit Demo") : String(localized: "Try Demo")
+        if isDemo {
+            folderLabel.stringValue = String(localized: "Demo office: made-up work, kept on this Mac")
+            folderLabel.toolTip = nil
+            chooseFolderButton.title = folderAccess.folderURL == nil ? String(localized: "Choose Events Folder…") : String(localized: "Change Folder…")
+        } else if let url = folderAccess.folderURL {
             folderLabel.stringValue = String(localized: "Events folder: \(url.lastPathComponent)")
             folderLabel.toolTip = url.path(percentEncoded: false)
             chooseFolderButton.title = String(localized: "Change Folder…")
@@ -435,8 +478,18 @@ class ViewController: NSViewController {
     }
 
     private func reload() {
-        guard let eventsURL = folderAccess.eventsURL else { return }
         let now = Date.now
+        if isDemo {
+            // The demo is never published to iCloud: only real work goes to the iPhone.
+            let demo = DemoOffice.state(at: now)
+            office = SessionStore.Office(sessions: demo.sessions, activity: demo.activity)
+            snapshots = demo.snapshots(at: now)
+            approvals.showDemo(demo.approval)
+            floors = FloorSummary.listOrder(FloorSummary.floors(from: snapshots))
+            updateFloor(now: now)
+            return
+        }
+        guard let eventsURL = folderAccess.eventsURL else { return }
         office = SessionStore(folderURL: eventsURL).load(now: now)
         snapshots = office.sessions.flatMap { $0.snapshots(at: now) }
         // Floors with people at work come first; empty floors wait at the bottom, faded.
@@ -535,7 +588,10 @@ class ViewController: NSViewController {
     }
 
     private func updateEmptyState() {
-        if folderAccess.folderURL == nil {
+        defer { emptyDemoButton.isHidden = emptyStateLabel.isHidden }
+        if isDemo {
+            emptyStateLabel.isHidden = true
+        } else if folderAccess.folderURL == nil {
             emptyStateLabel.stringValue = "  " + String(localized: "No events folder chosen yet") + "  "
             emptyStateLabel.isHidden = false
         } else {
