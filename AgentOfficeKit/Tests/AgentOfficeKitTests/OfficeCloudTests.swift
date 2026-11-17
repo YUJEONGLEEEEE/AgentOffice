@@ -76,4 +76,17 @@ struct OfficeCloudTests {
         #expect(OfficeCloud.snapshot(from: record) == nil)
         #expect(OfficeCloud.approval(from: OfficeCloud.record(for: agent())) == nil)
     }
+
+    /// Notifications are not end-to-end encrypted, so they may name only the employee and the tool.
+    @Test func approvalNotificationNeverCarriesTheCommand() throws {
+        let subscription = OfficeCloud.approvalSubscription()
+        let info = try #require(subscription.notificationInfo)
+
+        #expect(info.alertLocalizationArgs == ["agentName", "tool"])
+        #expect(info.desiredKeys == nil)
+        #expect(info.category == ApprovalNotification.categoryID)
+        #expect(subscription.querySubscriptionOptions == [.firesOnRecordCreation])
+        #expect(subscription.zoneID?.zoneName == "Office")
+        #expect(subscription.recordType == "Approval")
+    }
 }

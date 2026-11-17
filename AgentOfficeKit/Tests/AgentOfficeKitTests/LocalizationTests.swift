@@ -1,3 +1,4 @@
+import AgentOfficeKit
 import Foundation
 import Testing
 
@@ -46,6 +47,16 @@ struct LocalizationTests {
             #expect(korean.state == "translated", "\(key)")
             #expect(!korean.value.isEmpty, "\(key)")
             #expect(Self.placeholders(in: korean.value).sorted() == Self.placeholders(in: key).sorted(), "\(key)")
+        }
+    }
+
+    /// iOS fills in the question notification from these keys, so the iPhone catalog must have them.
+    @Test func iPhoneCatalogHasTheNotificationText() throws {
+        let data = try Data(contentsOf: Self.repository.appending(path: "AgentOffice/Localizable.xcstrings"))
+        let catalog = try JSONDecoder().decode(Catalog.self, from: data)
+
+        for key in [ApprovalNotification.titleKey, ApprovalNotification.bodyKey] {
+            #expect(catalog.strings[key]?.localizations?["ko"]?.stringUnit != nil, "\(key)")
         }
     }
 }
