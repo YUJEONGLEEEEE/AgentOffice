@@ -32,12 +32,32 @@
         }
       }
     },
+    "Allowed" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "허용됨"
+          }
+        }
+      }
+    },
     "Building" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "건물"
+          }
+        }
+      }
+    },
+    "Couldn’t check" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "확인 못 함"
           }
         }
       }
@@ -62,12 +82,42 @@
         }
       }
     },
+    "Done" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료"
+          }
+        }
+      }
+    },
+    "Failed" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실패"
+          }
+        }
+      }
+    },
     "Floors" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "층"
+          }
+        }
+      }
+    },
+    "Last error: %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "마지막 오류: %@"
           }
         }
       }
@@ -82,12 +132,32 @@
         }
       }
     },
+    "Lock screen: %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "잠금 화면: %@"
+          }
+        }
+      }
+    },
     "Mac offline · Last updated %@" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mac 오프라인 · 마지막 업데이트 %@"
+          }
+        }
+      }
+    },
+    "Missing" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "없음"
           }
         }
       }
@@ -102,6 +172,66 @@
         }
       }
     },
+    "Not allowed" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "허용 안 됨"
+          }
+        }
+      }
+    },
+    "Not asked yet" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 묻지 않음"
+          }
+        }
+      }
+    },
+    "Notification Status" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "알림 상태"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "확인"
+          }
+        }
+      }
+    },
+    "Off" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "꺼짐"
+          }
+        }
+      }
+    },
+    "On" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "켜짐"
+          }
+        }
+      }
+    },
     "Permission needed" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -109,6 +239,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "허락이 필요해요"
+          }
+        }
+      }
+    },
+    "Permission: %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "알림 권한: %@"
+          }
+        }
+      }
+    },
+    "Push registration: %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "알림 등록: %@"
           }
         }
       }
@@ -139,6 +289,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "보기 방식"
+          }
+        }
+      }
+    },
+    "Waiting" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기다리는 중"
+          }
+        }
+      }
+    },
+    "iCloud sign-up: %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud 신청: %@"
           }
         }
       }

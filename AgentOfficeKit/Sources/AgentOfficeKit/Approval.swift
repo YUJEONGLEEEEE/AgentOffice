@@ -88,6 +88,19 @@ public struct ApprovalFolder: Sendable {
         try body.write(to: url.appending(path: "\(request.id).answer.json"), options: [.atomic])
     }
 
+    /// Removes answers nobody will read: the question ended (answered in the terminal, say)
+    /// just as an answer arrived from the app or the iPhone.
+    public func removeUnclaimedAnswers() {
+        let files = (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
+        let names = Set(files.map(\.lastPathComponent))
+        for file in files where file.lastPathComponent.hasSuffix(".answer.json") {
+            let id = file.lastPathComponent.dropLast(".answer.json".count)
+            if !names.contains("\(id).request.json") {
+                try? FileManager.default.removeItem(at: file)
+            }
+        }
+    }
+
     /// Tells the hook the app is open and answering.
     public func markAlive(now: Date = .now) throws {
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true,

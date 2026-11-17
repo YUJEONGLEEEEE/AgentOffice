@@ -23,6 +23,10 @@ BASE_DIR="${AGENTOFFICE_DIR:-$HOME/Library/Application Support/AgentOffice}"
 APPROVALS_DIR="$BASE_DIR/Approvals"
 EVENTS_DIR="$BASE_DIR/Events"
 WAIT_SECONDS="${AGENTOFFICE_APPROVAL_WAIT:-300}"
+# A wait that is not a plain number would stop the script halfway, so fall back to the default.
+case "$WAIT_SECONDS" in
+  "" | *[!0-9]*) WAIT_SECONDS=300 ;;
+esac
 ALIVE_SECONDS=15
 
 command -v jq >/dev/null 2>&1 || exit 0
@@ -52,7 +56,9 @@ esac
 request="$APPROVALS_DIR/$id.request.json"
 answer="$APPROVALS_DIR/$id.answer.json"
 cleanup() { rm -f "$request" "$request.tmp" "$answer"; }
-trap 'cleanup; exit 0' TERM INT HUP
+# The question file is removed however the script ends, so no question is left behind.
+trap cleanup EXIT
+trap 'exit 0' TERM INT HUP
 
 project_dir="${CLAUDE_PROJECT_DIR:-}"
 if [ -z "$project_dir" ]; then

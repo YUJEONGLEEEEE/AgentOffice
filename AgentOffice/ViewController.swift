@@ -223,8 +223,26 @@ class ViewController: UIViewController {
                 self?.choose(floor: floor.name)
             }
         }
-        let menu = UIMenu(title: String(localized: "Floors"), children: [all, UIMenu(options: .displayInline, children: floorActions)])
+        let status = UIAction(title: String(localized: "Notification Status"), image: UIImage(systemName: "bell.badge")) { [weak self] _ in
+            self?.showNotificationStatus()
+        }
+        let menu = UIMenu(title: String(localized: "Floors"), children: [
+            all,
+            UIMenu(options: .displayInline, children: floorActions),
+            UIMenu(options: .displayInline, children: [status]),
+        ])
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: String(localized: "Floors"), image: UIImage(systemName: "building.2"), menu: menu)
+    }
+
+    /// Shows each step a question notification passes, so a missing notification can be traced without a cable.
+    private func showNotificationStatus() {
+        Task {
+            let lines = await PhoneApprovals.shared.statusLines()
+            let alert = UIAlertController(title: String(localized: "Notification Status"),
+                                          message: lines.joined(separator: "\n"), preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: String(localized: "OK"), style: .default))
+            present(alert, animated: true)
+        }
     }
 
     private func choose(floor: String?) {
@@ -236,6 +254,7 @@ class ViewController: UIViewController {
 
     @objc private func appDidBecomeActive() {
         startRefreshing()
+        PhoneApprovals.shared.prepare()
     }
 
     @objc private func appWillResignActive() {
@@ -273,6 +292,7 @@ class ViewController: UIViewController {
                 // Questions from a Mac that went offline can no longer be passed on.
                 let macIsOnline = office.lastUpdated.map { Date.now.timeIntervalSince($0) <= Self.offlineAfter } ?? false
                 approvalModel.requests = macIsOnline ? office.approvals : []
+                await PhoneApprovals.shared.removeNotifications(except: Set(approvalModel.requests.map(\.id)))
                 messageLabel.text = agents.isEmpty ? String(localized: "No one is in the office yet.\nOpen AgentOffice on your Mac.") : nil
             } catch OfficeCloud.CloudError.accountUnavailable {
                 messageLabel.text = String(localized: "Sign in to iCloud in Settings\nto see the office on your Mac.")

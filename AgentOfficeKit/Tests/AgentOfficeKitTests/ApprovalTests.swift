@@ -64,6 +64,20 @@ struct ApprovalFolderTests {
         #expect(throws: (any Error).self) { try folder.answer(request, with: .allow) }
     }
 
+    @Test func removesAnswersWhoseQuestionEnded() throws {
+        let folder = try makeFolder()
+        let open = ApprovalRequest(id: "open-1", sessionID: "s", project: "P", tool: "Bash", summary: "", createdAt: .now)
+        let ended = ApprovalRequest(id: "ended-1", sessionID: "s", project: "P", tool: "Bash", summary: "", createdAt: .now)
+        try Data("{}".utf8).write(to: folder.url.appending(path: "open-1.request.json"))
+        try folder.answer(open, with: .allow)
+        try folder.answer(ended, with: .deny)
+
+        folder.removeUnclaimedAnswers()
+
+        #expect(FileManager.default.fileExists(atPath: folder.url.appending(path: "open-1.answer.json").path))
+        #expect(!FileManager.default.fileExists(atPath: folder.url.appending(path: "ended-1.answer.json").path))
+    }
+
     @Test func marksTheAppAliveAndClosed() throws {
         let folder = try makeFolder()
         let alive = folder.url.appending(path: ApprovalFolder.aliveFileName)

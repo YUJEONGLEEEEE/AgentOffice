@@ -1,5 +1,6 @@
 import AppKit
 import AgentOfficeKit
+import os
 import UserNotifications
 
 /// Lets the user answer Claude Code's permission questions from the app.
@@ -16,6 +17,7 @@ final class ApprovalCenter: NSObject {
     private static let cloudInterval: TimeInterval = 3
     /// After a failure (no iCloud account, no network), iCloud is tried again after this long.
     private static let cloudRetryDelay: TimeInterval = 30
+    private static let log = Logger(subsystem: "com.aspyn.AgentOfficeMac", category: "approvals")
     private static let categoryID = "approval"
     private static let allowActionID = "allow"
     private static let denyActionID = "deny"
@@ -76,6 +78,7 @@ final class ApprovalCenter: NSObject {
     private func refresh() {
         guard let folder else { return }
         try? folder.markAlive()
+        folder.removeUnclaimedAnswers()
         update(folder.requests())
         syncCloud()
     }
@@ -90,11 +93,21 @@ final class ApprovalCenter: NSObject {
 
         isSyncingCloud = true
         lastCloudSync = now
+        let isNew = ids != cloudIDs
         Task {
-            guard let answers = try? await cloud.syncApprovals(requests) else {
+            let started = Date.now
+            let answers: [String: ApprovalDecision]
+            do {
+                answers = try await cloud.syncApprovals(requests)
+            } catch {
+                Self.log.error("iCloud sync failed: \(error.localizedDescription, privacy: .public)")
                 lastCloudSync = .now.addingTimeInterval(Self.cloudRetryDelay)
                 isSyncingCloud = false
                 return
+            }
+            if isNew {
+                let seconds = Date.now.timeIntervalSince(started)
+                Self.log.notice("iCloud has \(ids.count, privacy: .public) questions, synced in \(seconds, format: .fixed(precision: 1), privacy: .public)s")
             }
             cloudIDs = ids
             isSyncingCloud = false

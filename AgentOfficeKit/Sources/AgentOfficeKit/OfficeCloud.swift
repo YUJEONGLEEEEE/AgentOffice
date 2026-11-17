@@ -56,7 +56,7 @@ public actor OfficeCloud {
         let currentIDs = Set(agents.map(\.id))
         let removed = publishedIDs.subtracting(currentIDs).map { CKRecord.ID(recordName: $0, zoneID: Self.zoneID) }
 
-        _ = try await database.modifyRecords(saving: records + [status], deleting: removed, savePolicy: .allKeys)
+        try await modify(saving: records + [status], deleting: removed, savePolicy: .allKeys)
         publishedIDs = currentIDs
     }
 
@@ -66,7 +66,7 @@ public actor OfficeCloud {
         try await ensureZone()
         let status = CKRecord(recordType: Self.statusRecordType, recordID: Self.statusRecordID)
         status["lastUpdated"] = now
-        _ = try await database.modifyRecords(saving: [status], deleting: [], savePolicy: .allKeys)
+        try await modify(saving: [status], deleting: [], savePolicy: .allKeys)
     }
 
     /// Learns which agents are already in iCloud, so agents that left while the Mac app was closed get removed.
@@ -91,7 +91,9 @@ public actor OfficeCloud {
         let new = requests.filter { !uploaded.contains($0.id) }.map(Self.record(for:))
         let gone = uploaded.subtracting(openIDs).map { CKRecord.ID(recordName: $0, zoneID: Self.zoneID) }
         if !new.isEmpty || !gone.isEmpty {
-            _ = try await database.modifyRecords(saving: new, deleting: gone, savePolicy: .ifServerRecordUnchanged)
+            // A question that is already there (saved by a sync that failed halfway) counts as uploaded.
+            try await modify(saving: new, deleting: gone, savePolicy: .ifServerRecordUnchanged,
+                             ignoring: [.serverRecordChanged])
         }
         uploadedApprovalIDs = openIDs
         guard !openIDs.isEmpty else { return [:] }
@@ -146,10 +148,19 @@ public actor OfficeCloud {
         }
         guard record["decision"] == nil else { return }
         record["decision"] = decision.rawValue
+        // Answered in the terminal or on the Mac at the same moment: that answer stands.
+        try await modify(saving: [record], deleting: [], savePolicy: .ifServerRecordUnchanged,
+                         ignoring: [.serverRecordChanged, .unknownItem])
+    }
+
+    /// Whether iCloud has this user's sign-up for new questions, for the notification status screen.
+    public func hasApprovalSubscription() async throws -> Bool {
+        try await ensureAccount()
         do {
-            _ = try await database.modifyRecords(saving: [record], deleting: [], savePolicy: .ifServerRecordUnchanged)
-        } catch let error as CKError where error.code == .serverRecordChanged || error.code == .unknownItem {
-            // Answered in the terminal or on the Mac at the same moment; that answer stands.
+            _ = try await database.subscription(for: Self.approvalSubscriptionID)
+            return true
+        } catch let error as CKError where error.code == .unknownItem {
+            return false
         }
     }
 
@@ -157,10 +168,17 @@ public actor OfficeCloud {
     /// The notification names the employee and the tool, never the command: notifications are not end-to-end encrypted.
     public func subscribeToApprovals() async throws {
         try await ensureAccount()
-        let subscription = CKQuerySubscription(recordType: Self.approvalRecordType, predicate: NSPredicate(value: true),
-                                               subscriptionID: Self.approvalSubscriptionID,
+        let (saved, _) = try await database.modifySubscriptions(saving: [Self.approvalSubscription()], deleting: [])
+        for result in saved.values {
+            if case .failure(let error) = result { throw error }
+        }
+    }
+
+    static func approvalSubscription() -> CKQuerySubscription {
+        let subscription = CKQuerySubscription(recordType: approvalRecordType, predicate: NSPredicate(value: true),
+                                               subscriptionID: approvalSubscriptionID,
                                                options: [.firesOnRecordCreation])
-        subscription.zoneID = Self.zoneID
+        subscription.zoneID = zoneID
         let info = CKSubscription.NotificationInfo()
         info.titleLocalizationKey = ApprovalNotification.titleKey
         info.alertLocalizationKey = ApprovalNotification.bodyKey
@@ -168,7 +186,7 @@ public actor OfficeCloud {
         info.soundName = "default"
         info.category = ApprovalNotification.categoryID
         subscription.notificationInfo = info
-        _ = try await database.modifySubscriptions(saving: [subscription], deleting: [])
+        return subscription
     }
 
     // MARK: - Setup
@@ -177,6 +195,27 @@ public actor OfficeCloud {
         guard try await container.accountStatus() == .available else {
             throw CloudError.accountUnavailable
         }
+    }
+
+    /// Saves and deletes records, and throws if any one of them failed.
+    /// `modifyRecords` reports each record's failure in its results instead of throwing, so they are checked here.
+    private func modify(saving: [CKRecord], deleting: [CKRecord.ID],
+                        savePolicy: CKModifyRecordsOperation.RecordSavePolicy,
+                        ignoring ignored: Set<CKError.Code> = []) async throws {
+        let (saveResults, deleteResults) = try await database.modifyRecords(saving: saving, deleting: deleting,
+                                                                             savePolicy: savePolicy)
+        // A record that is already gone is what deleting wanted anyway.
+        let deleteIgnored = ignored.union([.unknownItem])
+        for result in saveResults.values {
+            if case .failure(let error) = result, !Self.error(error, isOneOf: ignored) { throw error }
+        }
+        for result in deleteResults.values {
+            if case .failure(let error) = result, !Self.error(error, isOneOf: deleteIgnored) { throw error }
+        }
+    }
+
+    private static func error(_ error: Error, isOneOf codes: Set<CKError.Code>) -> Bool {
+        (error as? CKError).map { codes.contains($0.code) } ?? false
     }
 
     /// Every record in the office zone.
