@@ -31,6 +31,12 @@ final class ApprovalCenter: NSObject {
     private var notifiedIDs: Set<String> = []
     private var askedForNotifications = false
 
+    /// Questions from Claude Code. Only these reach notifications, iCloud and the hook.
+    private var realRequests: [ApprovalRequest] = []
+    /// The demo office's question, shown in the panel only. Answering it does nothing.
+    private var demoRequest: ApprovalRequest?
+    private var answeredDemoIDs: Set<String> = []
+
     private let cloud = OfficeCloud()
     /// The questions iCloud has. `nil` until the first sync, which also clears questions left by an earlier run.
     private var cloudIDs: Set<String>?
@@ -71,8 +77,19 @@ final class ApprovalCenter: NSObject {
     }
 
     func answer(_ request: ApprovalRequest, with decision: ApprovalDecision) {
+        if DemoOffice.isDemo(request) {
+            answeredDemoIDs.insert(request.id)
+            publish()
+            return
+        }
         try? folder?.answer(request, with: decision)
-        update(model.requests.filter { $0.id != request.id })
+        update(realRequests.filter { $0.id != request.id })
+    }
+
+    /// Shows the demo office's question in the panel, or removes it with `nil`.
+    func showDemo(_ request: ApprovalRequest?) {
+        demoRequest = request
+        publish()
     }
 
     private func refresh() {
@@ -86,7 +103,7 @@ final class ApprovalCenter: NSObject {
     /// Sends new questions to iCloud, removes answered ones, and applies answers given on the iPhone.
     private func syncCloud(now: Date = .now) {
         guard !isSyncingCloud else { return }
-        let requests = model.requests
+        let requests = realRequests
         let ids = Set(requests.map(\.id))
         let elapsed = now.timeIntervalSince(lastCloudSync)
         guard elapsed >= 0, ids != cloudIDs || (!ids.isEmpty && elapsed >= Self.cloudInterval) else { return }
@@ -112,7 +129,7 @@ final class ApprovalCenter: NSObject {
             cloudIDs = ids
             isSyncingCloud = false
             for (id, decision) in answers {
-                if let request = model.requests.first(where: { $0.id == id }) {
+                if let request = realRequests.first(where: { $0.id == id }) {
                     answer(request, with: decision)
                 }
             }
@@ -131,8 +148,16 @@ final class ApprovalCenter: NSObject {
             notifiedIDs.insert(request.id)
             notify(request)
         }
-        guard requests != model.requests else { return }
-        model.requests = requests
+        realRequests = requests
+        publish()
+    }
+
+    /// Updates the panel: real questions first, then the demo's.
+    private func publish() {
+        let demo = demoRequest.map { answeredDemoIDs.contains($0.id) ? [] : [$0] } ?? []
+        let shown = realRequests + demo
+        guard shown != model.requests else { return }
+        model.requests = shown
         onChange?()
     }
 
@@ -153,7 +178,7 @@ final class ApprovalCenter: NSObject {
     }
 
     fileprivate func handle(actionID: String, requestID: String) {
-        guard let request = model.requests.first(where: { $0.id == requestID }) else { return }
+        guard let request = realRequests.first(where: { $0.id == requestID }) else { return }
         switch actionID {
         case Self.allowActionID:
             answer(request, with: .allow)

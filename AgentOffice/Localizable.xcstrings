@@ -72,6 +72,26 @@
         }
       }
     },
+    "Demo Office" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데모 사무실"
+          }
+        }
+      }
+    },
+    "Demo office · Made-up work, nothing is sent anywhere" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데모 사무실 · 지어낸 작업이에요. 어디로도 보내지 않아요"
+          }
+        }
+      }
+    },
     "Deny" : {
       "localizations" : {
         "ko" : {
@@ -279,6 +299,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "직원"
+          }
+        }
+      }
+    },
+    "Try Demo" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데모 보기"
           }
         }
       }

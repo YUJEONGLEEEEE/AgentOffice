@@ -5,6 +5,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+- A demo office on the Mac and the iPhone: two made-up projects at work, with a permission question to try. It stays on the device and runs nothing
+
 ### Fixed
 - Questions with choices and plans to approve stay in the terminal, instead of showing Allow and Deny in the app (plugin 1.1.1)
 

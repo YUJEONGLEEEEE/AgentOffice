@@ -262,6 +262,26 @@
         }
       }
     },
+    "Demo Office" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데모 사무실"
+          }
+        }
+      }
+    },
+    "Demo office: made-up work, kept on this Mac" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데모 사무실: 지어낸 작업이에요. 이 Mac 밖으로 나가지 않아요"
+          }
+        }
+      }
+    },
     "Deny" : {
       "localizations" : {
         "ko" : {
@@ -288,6 +308,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "기록 폴더: %@"
+          }
+        }
+      }
+    },
+    "Exit Demo" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데모 끝내기"
           }
         }
       }
@@ -538,6 +568,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "여기서 허락 요청에 답하려면 Events가 들어 있는 AgentOffice 폴더를 골라 주세요."
+          }
+        }
+      }
+    },
+    "Try Demo" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데모 보기"
           }
         }
       }

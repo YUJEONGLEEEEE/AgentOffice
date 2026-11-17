@@ -50,6 +50,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
         office?.show(style: .building)
     }
 
+    /// View > Demo Office
+    @objc func toggleDemo(_ sender: Any?) {
+        office?.toggleDemo(sender)
+    }
+
     /// Puts a check mark next to the view style in use.
     func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
         switch menuItem.action {
@@ -58,6 +63,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValidation {
             return office != nil
         case #selector(showBuilding(_:)):
             menuItem.state = office?.viewStyle == .building ? .on : .off
+            return office != nil
+        case #selector(toggleDemo(_:)):
+            menuItem.state = office?.isDemo == true ? .on : .off
             return office != nil
         case #selector(showSetupGuide(_:)):
             return office != nil
