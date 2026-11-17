@@ -89,6 +89,8 @@ class ViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         startRefreshing()
+        // Ask as soon as the office is on screen; waiting for iCloud first made the question come late.
+        PhoneApprovals.shared.prepare()
     }
 
     // MARK: - Layout
@@ -271,7 +273,6 @@ class ViewController: UIViewController {
                 // Questions from a Mac that went offline can no longer be passed on.
                 let macIsOnline = office.lastUpdated.map { Date.now.timeIntervalSince($0) <= Self.offlineAfter } ?? false
                 approvalModel.requests = macIsOnline ? office.approvals : []
-                PhoneApprovals.shared.prepare()
                 messageLabel.text = agents.isEmpty ? String(localized: "No one is in the office yet.\nOpen AgentOffice on your Mac.") : nil
             } catch OfficeCloud.CloudError.accountUnavailable {
                 messageLabel.text = String(localized: "Sign in to iCloud in Settings\nto see the office on your Mac.")

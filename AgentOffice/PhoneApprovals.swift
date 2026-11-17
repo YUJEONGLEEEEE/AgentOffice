@@ -35,7 +35,7 @@ final class PhoneApprovals: NSObject {
     }
 
     /// Asks for notifications and signs up for new questions.
-    /// Called once the office has loaded, so the request comes when the user can see what it is for.
+    /// Called when the office first shows, so the request comes with the app it is for.
     func prepare() {
         guard !isPrepared else { return }
         isPrepared = true
