@@ -41,10 +41,6 @@ When a new question arrives, iCloud sends your iPhone a notification through App
 - **Mac and iPhone: notifications**, to tell you about permission questions. You can turn them off in Settings at any time.
 - **iCloud**, to sync the office between your Mac and iPhone. Without iCloud, the Mac app still works on its own.
 
-## Demo office
-
-The demo office is made up on the device. It is never saved, sent to iCloud or passed to Claude Code, and answering its permission question runs nothing.
-
 ## Crash reports
 
 If you choose to share crash reports or analytics with app developers in your device settings, Apple may send the developer anonymous crash reports. This is controlled by Apple and you, not by AgentOffice.
@@ -54,16 +50,13 @@ If you choose to share crash reports or analytics with app developers in your de
 - **On your Mac:** delete the folder `~/Library/Application Support/AgentOffice`. To stop recording, uninstall the plugin in Claude Code.
 - **In iCloud:** open the iPhone Settings app, tap your name, then **iCloud**, and manage the storage for AgentOffice. Data in iCloud is also replaced as the office changes.
 
-## Children
-
-AgentOffice is a tool for software developers and is not directed at children.
-
 ## Changes
 
 If this policy changes, the new version will be posted on this page with a new effective date. The history of every change is public in the [project repository](https://github.com/YUJEONGLEEEEE/AgentOffice/commits/main/docs/privacy.md).
 
 ## Contact
 
-Questions about privacy: please open an issue at [github.com/YUJEONGLEEEEE/AgentOffice/issues](https://github.com/YUJEONGLEEEEE/AgentOffice/issues).
+For questions or requests about privacy, contact:
 
-AgentOffice is an independent project and is not affiliated with or endorsed by Anthropic.
+- **Yujeong Lee**, [aspynlee.dev@gmail.com](mailto:aspynlee.dev@gmail.com)
+- Questions that can be public are also welcome as [GitHub issues](https://github.com/YUJEONGLEEEEE/AgentOffice/issues).
