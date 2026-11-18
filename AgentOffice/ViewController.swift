@@ -31,6 +31,8 @@ class ViewController: UIViewController {
     private var lastLoad = Date.distantPast
     /// Shows a made-up office, for trying the app without a Mac and for App Review.
     private var isDemo = false
+    /// When the demo was turned on, so its script plays from the beginning.
+    private var demoStart = Date.now
     private var answeredDemoIDs: Set<String> = []
     private let demoButton = UIButton(configuration: .borderedProminent())
 
@@ -268,6 +270,7 @@ class ViewController: UIViewController {
     /// Turns the demo office on or off. The demo never reads or writes iCloud.
     private func setDemo(_ on: Bool) {
         isDemo = on
+        demoStart = .now
         chosenFloor = nil
         agents = []
         lastUpdated = nil
@@ -316,7 +319,7 @@ class ViewController: UIViewController {
     private func load() {
         if isDemo {
             let now = Date.now
-            let demo = DemoOffice.state(at: now)
+            let demo = DemoOffice.state(at: now, startedAt: demoStart)
             lastLoad = now
             agents = demo.snapshots(at: now)
             lastUpdated = now

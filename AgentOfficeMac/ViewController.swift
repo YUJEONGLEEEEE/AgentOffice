@@ -64,6 +64,8 @@ class ViewController: NSViewController {
     private let emptyStateLabel = NSTextField(labelWithString: "")
     /// Shows a made-up office, for trying the app before Claude Code is set up.
     private(set) var isDemo = false
+    /// When the demo was turned on, so its script plays from the beginning.
+    private var demoStart = Date.now
     private let demoButton = NSButton(title: String(localized: "Try Demo"), target: nil, action: nil)
     private let emptyDemoButton = NSButton(title: String(localized: "Try Demo"), target: nil, action: nil)
 
@@ -398,6 +400,7 @@ class ViewController: NSViewController {
     /// The header button, the button on the empty office, and View > Demo Office.
     @objc func toggleDemo(_ sender: Any?) {
         isDemo.toggle()
+        demoStart = .now
         // The demo has its own floors, so start from the whole office with nobody walking in.
         chosenFloor = nil
         officeScene.removeAllAgents()
@@ -481,7 +484,7 @@ class ViewController: NSViewController {
         let now = Date.now
         if isDemo {
             // The demo is never published to iCloud: only real work goes to the iPhone.
-            let demo = DemoOffice.state(at: now)
+            let demo = DemoOffice.state(at: now, startedAt: demoStart)
             office = SessionStore.Office(sessions: demo.sessions, activity: demo.activity)
             snapshots = demo.snapshots(at: now)
             approvals.showDemo(demo.approval)

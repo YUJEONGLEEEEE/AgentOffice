@@ -5,8 +5,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-17
+
 ### Added
 - A demo office on the Mac and the iPhone: two made-up projects at work, with a permission question to try. It stays on the device and runs nothing
+- A privacy policy in English and Korean: https://yujeongleeeee.github.io/AgentOffice/privacy
 
 ### Fixed
 - Questions with choices and plans to approve stay in the terminal, instead of showing Allow and Deny in the app (plugin 1.1.1)
@@ -56,6 +59,7 @@ The first public release: a signed and notarized Mac app, and the Claude Code pl
 - Employees of the same role no longer share one spot in a crowded room (#21)
 - The hook records the folder the session started in (#9)
 
-[Unreleased]: https://github.com/YUJEONGLEEEEE/AgentOffice/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/YUJEONGLEEEEE/AgentOffice/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/YUJEONGLEEEEE/AgentOffice/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/YUJEONGLEEEEE/AgentOffice/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/YUJEONGLEEEEE/AgentOffice/releases/tag/v1.0.0

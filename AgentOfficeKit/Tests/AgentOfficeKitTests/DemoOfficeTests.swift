@@ -4,12 +4,12 @@ import Testing
 
 struct DemoOfficeTests {
 
-    /// The start of one run of the script.
-    private let loopStart = Date(timeIntervalSinceReferenceDate: DemoOffice.loopDuration * 1_000)
+    /// When the demo was turned on: the script plays from its beginning.
+    private let loopStart = Date(timeIntervalSinceReferenceDate: 812_345_678)
 
     private func state(at seconds: TimeInterval) -> (DemoOffice.State, [AgentSnapshot]) {
         let now = loopStart.addingTimeInterval(seconds)
-        let state = DemoOffice.state(at: now)
+        let state = DemoOffice.state(at: now, startedAt: loopStart)
         return (state, state.snapshots(at: now))
     }
 
@@ -30,6 +30,15 @@ struct DemoOfficeTests {
         #expect(leader.status == .waiting)
         #expect(question.tool == "Bash")
         #expect(DemoOffice.isDemo(question))
+    }
+
+    /// App Review is told the question shows about 45 seconds in, so it must stay up around then.
+    @Test func questionShowsAboutFortyFiveSecondsAfterTurningOn() {
+        #expect(state(at: 40).0.approval == nil)
+        #expect(state(at: 45).0.approval != nil)
+        #expect(state(at: 70).0.approval != nil)
+        // And again in the next run of the script.
+        #expect(state(at: DemoOffice.loopDuration + 45).0.approval != nil)
     }
 
     @Test func everyoneRestsAtTheEndAndTheQuestionIsGone() {

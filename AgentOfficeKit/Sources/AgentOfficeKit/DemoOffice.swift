@@ -33,7 +33,8 @@ public enum DemoOffice {
     static let portfolioProject = "Portfolio"
 
     /// When the permission question is open, in seconds into the loop.
-    static let approvalWindow: Range<TimeInterval> = 43..<58
+    /// Long enough to notice and answer it.
+    static let approvalWindow: Range<TimeInterval> = 43..<73
 
     /// One line of the script.
     struct Step {
@@ -65,10 +66,10 @@ public enum DemoOffice {
             Step(at: 42, session: lunch, kind: .preToolUse, tool: "Bash"),
             Step(at: approvalWindow.lowerBound, session: lunch, kind: .permissionRequest, tool: "Bash"),
             Step(at: approvalWindow.upperBound, session: lunch, kind: .postToolUse, tool: "Bash"),
-            Step(at: 61, session: lunch, kind: .subagentStart, member: qa),
-            Step(at: 65, session: lunch, kind: .preToolUse, tool: "Grep", member: qa),
-            Step(at: 80, session: lunch, kind: .subagentStop, member: qa),
-            Step(at: 84, session: lunch, kind: .stop),
+            Step(at: 76, session: lunch, kind: .subagentStart, member: qa),
+            Step(at: 80, session: lunch, kind: .preToolUse, tool: "Grep", member: qa),
+            Step(at: 95, session: lunch, kind: .subagentStop, member: qa),
+            Step(at: 99, session: lunch, kind: .stop),
 
             // Portfolio: research on the web, design work, then editing the site.
             Step(at: 5, session: site, kind: .sessionStart),
@@ -87,12 +88,12 @@ public enum DemoOffice {
         ]
     }()
 
-    /// The demo office at `now`. The previous run of the script is included,
-    /// so starting over looks like the next day of work instead of everyone vanishing.
-    public static func state(at now: Date) -> State {
-        let seconds = now.timeIntervalSinceReferenceDate
-        let loop = (seconds / loopDuration).rounded(.down)
-        let loopStart = Date(timeIntervalSinceReferenceDate: loop * loopDuration)
+    /// The demo office at `now`, for a demo turned on at `start`, so the script plays from its beginning.
+    /// The previous run of the script is included, so starting over looks like the next day of work
+    /// instead of everyone vanishing, and the office is not empty when the demo opens.
+    public static func state(at now: Date, startedAt start: Date) -> State {
+        let loop = max(0, (now.timeIntervalSince(start) / loopDuration).rounded(.down))
+        let loopStart = start.addingTimeInterval(loop * loopDuration)
         let elapsed = now.timeIntervalSince(loopStart)
 
         var sessions: [AgentSession] = []
