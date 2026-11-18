@@ -8,7 +8,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 ## [1.2.0] - 2026-11-17
 
 ### Added
-- A demo office on the Mac and the iPhone: two made-up projects at work, with a permission question to try. It stays on the device and runs nothing
+- A welcome guide on the iPhone on first launch, with a live office preview and a permission question to try. It can be opened again from the floor menu
+- A live office preview in the Mac setup guide. The preview uses made-up work that stays on the device
 - A privacy policy in English and Korean: https://yujeongleeeee.github.io/AgentOffice/privacy
 
 ### Fixed

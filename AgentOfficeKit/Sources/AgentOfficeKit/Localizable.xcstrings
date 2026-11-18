@@ -41,6 +41,16 @@
         }
       }
     },
+    "A sample office with people moving between rooms as they work" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "직원들이 일하면서 방을 옮겨 다니는 예시 사무실"
+          }
+        }
+      }
+    },
     "All" : {
       "localizations" : {
         "ko" : {

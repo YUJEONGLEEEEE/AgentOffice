@@ -33,9 +33,6 @@ final class ApprovalCenter: NSObject {
 
     /// Questions from Claude Code. Only these reach notifications, iCloud and the hook.
     private var realRequests: [ApprovalRequest] = []
-    /// The demo office's question, shown in the panel only. Answering it does nothing.
-    private var demoRequest: ApprovalRequest?
-    private var answeredDemoIDs: Set<String> = []
 
     private let cloud = OfficeCloud()
     /// The questions iCloud has. `nil` until the first sync, which also clears questions left by an earlier run.
@@ -77,20 +74,10 @@ final class ApprovalCenter: NSObject {
     }
 
     func answer(_ request: ApprovalRequest, with decision: ApprovalDecision) {
-        if DemoOffice.isDemo(request) {
-            answeredDemoIDs.insert(request.id)
-            publish()
-            return
-        }
         try? folder?.answer(request, with: decision)
         update(realRequests.filter { $0.id != request.id })
     }
 
-    /// Shows the demo office's question in the panel, or removes it with `nil`.
-    func showDemo(_ request: ApprovalRequest?) {
-        demoRequest = request
-        publish()
-    }
 
     private func refresh() {
         guard let folder else { return }
@@ -152,12 +139,9 @@ final class ApprovalCenter: NSObject {
         publish()
     }
 
-    /// Updates the panel: real questions first, then the demo's.
     private func publish() {
-        let demo = demoRequest.map { answeredDemoIDs.contains($0.id) ? [] : [$0] } ?? []
-        let shown = realRequests + demo
-        guard shown != model.requests else { return }
-        model.requests = shown
+        guard realRequests != model.requests else { return }
+        model.requests = realRequests
         onChange?()
     }
 

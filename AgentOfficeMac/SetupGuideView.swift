@@ -1,3 +1,4 @@
+import AgentOfficeKit
 import AppKit
 import SwiftUI
 
@@ -32,6 +33,14 @@ struct SetupGuideView: View {
                 Text("Set Up AgentOffice")
                     .font(.title2.bold())
                 Text("Three steps connect your Claude Code sessions to the office.")
+                    .foregroundStyle(.secondary)
+            }
+
+            // What the office will look like once connected: made-up work, nothing is read or sent.
+            VStack(alignment: .leading, spacing: 6) {
+                OfficePreviewView()
+                Text("A preview with made-up work. Your own sessions appear here after setup.")
+                    .font(.callout)
                     .foregroundStyle(.secondary)
             }
 
