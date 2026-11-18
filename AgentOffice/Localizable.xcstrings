@@ -42,12 +42,52 @@
         }
       }
     },
+    "Allowed: the command runs on your Mac" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "허락했어요: Mac에서 명령이 실행돼요"
+          }
+        }
+      }
+    },
+    "An office where your coding agents work" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "코딩 에이전트가 일하는 사무실"
+          }
+        }
+      }
+    },
+    "Answer permission questions anywhere" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "허락 요청은 어디서든 바로"
+          }
+        }
+      }
+    },
     "Building" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "건물"
+          }
+        }
+      }
+    },
+    "Commands are end-to-end encrypted and kept only in your own iCloud. Sign in with the same Apple Account as the AgentOffice Mac app." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "명령어는 종단간 암호화되어 내 iCloud에만 저장돼요. AgentOffice Mac 앱과 같은 Apple 계정으로 로그인하세요."
           }
         }
       }
@@ -72,22 +112,12 @@
         }
       }
     },
-    "Demo Office" : {
+    "Denied: the command does not run" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "데모 사무실"
-          }
-        }
-      }
-    },
-    "Demo office · Made-up work, nothing is sent anywhere" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "데모 사무실 · 지어낸 작업이에요. 어디로도 보내지 않아요"
+            "value" : "거절했어요: 명령이 실행되지 않아요"
           }
         }
       }
@@ -128,6 +158,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "층"
+          }
+        }
+      }
+    },
+    "Get Started" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시작하기"
           }
         }
       }
@@ -178,6 +218,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "없음"
+          }
+        }
+      }
+    },
+    "Next" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다음"
           }
         }
       }
@@ -273,12 +323,42 @@
         }
       }
     },
+    "Private by design" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "개인정보를 먼저 생각했어요"
+          }
+        }
+      }
+    },
     "Push registration: %@" : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "알림 등록: %@"
+          }
+        }
+      }
+    },
+    "See the Claude Code sessions on your Mac as people in a pixel-art office. They move to the room for the work they are doing." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mac에서 돌아가는 Claude Code 작업을 픽셀 사무실의 직원으로 보여 줘요. 하는 일에 맞는 방으로 옮겨 다녀요."
+          }
+        }
+      }
+    },
+    "Show Welcome Guide Again" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "처음 안내 다시 보기"
           }
         }
       }
@@ -303,16 +383,6 @@
         }
       }
     },
-    "Try Demo" : {
-      "localizations" : {
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "데모 보기"
-          }
-        }
-      }
-    },
     "View style" : {
       "localizations" : {
         "ko" : {
@@ -329,6 +399,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "기다리는 중"
+          }
+        }
+      }
+    },
+    "When a session asks to run a command, a notification arrives. Allow or Deny it from the lock screen or Apple Watch." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "작업이 명령을 실행하려고 허락을 물으면 알림이 와요. 잠금 화면이나 Apple Watch에서 허락하거나 거절하세요."
           }
         }
       }

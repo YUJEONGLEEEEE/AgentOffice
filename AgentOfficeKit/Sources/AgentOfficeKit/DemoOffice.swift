@@ -1,13 +1,12 @@
 import Foundation
 
-/// A made-up office for trying the app without Claude Code, and for App Review.
+/// Made-up work for the office preview in the first-run guides.
 ///
 /// Two projects work through a two-minute script that repeats: reading files, calling team members,
-/// editing code, running a command that needs permission, and resting. The script is written as the same
-/// events the hook records, so the demo goes through the same rules as real work.
+/// editing code, asking for permission to run a command, and resting. The script is written as the same
+/// events the hook records, so the preview goes through the same rules as real work.
 ///
-/// Demo data stays on the device. It is never written to the events folder or sent to iCloud,
-/// and answering its permission question runs nothing.
+/// It stays on the device: it is never written to the events folder or sent to iCloud.
 public enum DemoOffice {
 
     /// The length of one run of the script. It then starts over.
@@ -19,8 +18,6 @@ public enum DemoOffice {
         public let sessions: [AgentSession]
         /// Latest first.
         public let activity: [ActivityEntry]
-        /// The demo's permission question, while it is open.
-        public let approval: ApprovalRequest?
 
         public func snapshots(at now: Date) -> [AgentSnapshot] {
             sessions.flatMap { $0.snapshots(at: now) }
@@ -32,8 +29,7 @@ public enum DemoOffice {
     static let lunchProject = "LunchPicker"
     static let portfolioProject = "Portfolio"
 
-    /// When the permission question is open, in seconds into the loop.
-    /// Long enough to notice and answer it.
+    /// When the leader waits for permission, in seconds into the loop.
     static let approvalWindow: Range<TimeInterval> = 43..<73
 
     /// One line of the script.
@@ -88,9 +84,9 @@ public enum DemoOffice {
         ]
     }()
 
-    /// The demo office at `now`, for a demo turned on at `start`, so the script plays from its beginning.
+    /// The office at `now`, for a preview that opened at `start`, so the script plays from its beginning.
     /// The previous run of the script is included, so starting over looks like the next day of work
-    /// instead of everyone vanishing, and the office is not empty when the demo opens.
+    /// instead of everyone vanishing, and the office is not empty when the preview opens.
     public static func state(at now: Date, startedAt start: Date) -> State {
         let loop = max(0, (now.timeIntervalSince(start) / loopDuration).rounded(.down))
         let loopStart = start.addingTimeInterval(loop * loopDuration)
@@ -115,17 +111,7 @@ public enum DemoOffice {
             return lhsWorking != rhsWorking ? lhsWorking : lhs.lastActivity > rhs.lastActivity
         }
 
-        let approval = approvalWindow.contains(elapsed)
-            ? ApprovalRequest(id: "demo-\(Int(loop))", sessionID: lunchSession, project: lunchProject,
-                              tool: "Bash", summary: "swift test",
-                              createdAt: loopStart.addingTimeInterval(approvalWindow.lowerBound))
-            : nil
-        return State(sessions: sessions, activity: activity.sorted { $0.time > $1.time }, approval: approval)
-    }
-
-    /// Whether a permission question belongs to the demo, so answering it can be ignored safely.
-    public static func isDemo(_ request: ApprovalRequest) -> Bool {
-        request.sessionID == lunchSession || request.sessionID == portfolioSession
+        return State(sessions: sessions, activity: activity.sorted { $0.time > $1.time })
     }
 
     private static func event(for step: Step, at time: Date) -> AgentEvent {

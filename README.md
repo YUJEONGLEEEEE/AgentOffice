@@ -31,7 +31,7 @@ who is working, who is waiting for you and who is done.
   | Workspace | Everything else |
 
 - **Answer permission questions from the app.** When a session asks to use a tool, the question shows above the office and as a notification, with the command it will run. Allow or Deny there, on your iPhone, or in the terminal as usual: whichever answers first wins.
-- **Try it without Claude Code.** Choose Try Demo, or View > Demo Office, to see a made-up office at work. Nothing in the demo leaves the device.
+- **See it before you set it up.** The Mac setup guide and the iPhone welcome guide show a live office with made-up work. Nothing in the preview leaves the device.
 - **Status at a glance.** A tag over each head shows *working*, *waiting for you* or *resting*. Employees waiting for approval raise a hand.
 - **A resident team.** Custom subagents sit at their own desks in department uniforms. When they get work, the same character walks to the briefing, then to the work, and back.
 - **2D or 3D.** Switch between a top-down floor plan and a building in cutaway. Tap a floor to open it in 3D, then drag to turn and pinch to zoom.
@@ -122,8 +122,8 @@ swift test
 - [x] Signed and notarized Mac download on GitHub Releases
 - [x] A Claude Code plugin that installs the hook
 - [x] A setup guide in the Mac app
-- [ ] A demo mode that runs without Claude Code
-- [ ] A notification when an employee is waiting for your approval
+- [x] A live office preview in the setup guides, without Claude Code
+- [x] Answer permission questions from the Mac and the iPhone, with notifications
 - [ ] iPhone app on the App Store
 
 ## License

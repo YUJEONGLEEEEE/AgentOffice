@@ -4,7 +4,7 @@ import Testing
 
 struct DemoOfficeTests {
 
-    /// When the demo was turned on: the script plays from its beginning.
+    /// When the preview opened: the script plays from its beginning.
     private let loopStart = Date(timeIntervalSinceReferenceDate: 812_345_678)
 
     private func state(at seconds: TimeInterval) -> (DemoOffice.State, [AgentSnapshot]) {
@@ -22,29 +22,16 @@ struct DemoOfficeTests {
         #expect(developer.floor == "LunchPicker")
     }
 
-    @Test func askingForPermissionShowsAQuestionAndARaisedHand() throws {
-        let (state, agents) = state(at: 50)
+    @Test func leaderRaisesAHandWhileWaitingForPermission() throws {
+        let (_, agents) = state(at: 50)
         let leader = try #require(agents.first { $0.role == nil && $0.floor == "LunchPicker" })
-        let question = try #require(state.approval)
 
         #expect(leader.status == .waiting)
-        #expect(question.tool == "Bash")
-        #expect(DemoOffice.isDemo(question))
     }
 
-    /// App Review is told the question shows about 45 seconds in, so it must stay up around then.
-    @Test func questionShowsAboutFortyFiveSecondsAfterTurningOn() {
-        #expect(state(at: 40).0.approval == nil)
-        #expect(state(at: 45).0.approval != nil)
-        #expect(state(at: 70).0.approval != nil)
-        // And again in the next run of the script.
-        #expect(state(at: DemoOffice.loopDuration + 45).0.approval != nil)
-    }
+    @Test func everyoneRestsAtTheEnd() {
+        let (_, agents) = state(at: 110)
 
-    @Test func everyoneRestsAtTheEndAndTheQuestionIsGone() {
-        let (state, agents) = state(at: 110)
-
-        #expect(state.approval == nil)
         #expect(agents.filter { $0.role == nil }.allSatisfy { $0.status == .resting && $0.room == .breakRoom })
     }
 
@@ -58,9 +45,5 @@ struct DemoOfficeTests {
         }
     }
 
-    @Test func realQuestionsAreNotDemo() {
-        let real = ApprovalRequest(id: "x", sessionID: "970b809a", project: "P", tool: "Bash", summary: "", createdAt: .now)
 
-        #expect(!DemoOffice.isDemo(real))
-    }
 }
