@@ -36,7 +36,7 @@ struct OnboardingView: View {
                 .tag(1)
 
                 OnboardingPage(title: "Private by design",
-                               message: "Commands are end-to-end encrypted and kept only in your own iCloud. Sign in with the same Apple Account as the AgentOffice Mac app.") {
+                               message: "Commands are end-to-end encrypted and kept only in your own iCloud. Get AgentOffice for Mac from the App Store, and sign in with the same Apple Account on both.") {
                     Image(systemName: "lock.icloud.fill")
                         .font(.system(size: 96))
                         .foregroundStyle(.tint)
