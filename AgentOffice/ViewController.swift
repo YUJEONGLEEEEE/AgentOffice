@@ -334,7 +334,7 @@ class ViewController: UIViewController {
             let macIsOnline = office.lastUpdated.map { Date.now.timeIntervalSince($0) <= Self.offlineAfter } ?? false
             approvalModel.requests = macIsOnline ? office.approvals : []
             await PhoneApprovals.shared.removeNotifications(except: Set(approvalModel.requests.map(\.id)))
-            messageLabel.text = agents.isEmpty ? String(localized: "No one is in the office yet.\nOpen AgentOffice on your Mac.") : nil
+            messageLabel.text = agents.isEmpty ? String(localized: "No one is in the office yet.\nGet AgentOffice for Mac from the App Store and open it.") : nil
             showOffice()
         }
     }

@@ -124,7 +124,7 @@ swift test
 - [x] A setup guide in the Mac app
 - [x] A live office preview in the setup guides, without Claude Code
 - [x] Answer permission questions from the Mac and the iPhone, with notifications
-- [ ] iPhone app on the App Store
+- [ ] Mac and iPhone apps on the App Store, in one listing
 
 ## License
 

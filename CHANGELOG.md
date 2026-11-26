@@ -12,6 +12,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 - A live office preview in the Mac setup guide. The preview uses made-up work that stays on the device
 - A privacy policy in English and Korean: https://yujeongleeeee.github.io/AgentOffice/privacy
 
+### Changed
+- The Mac app and the iPhone app share one App Store listing. The Mac app's bundle ID is now `com.aspyn.AgentOffice`, so after updating from 1.1.0, choose the events folder once more
+- The iPhone app tells you where to get the Mac app
+
 ### Fixed
 - Questions with choices and plans to approve stay in the terminal, instead of showing Allow and Deny in the app (plugin 1.1.1)
 

@@ -17,7 +17,7 @@ final class ApprovalCenter: NSObject {
     private static let cloudInterval: TimeInterval = 3
     /// After a failure (no iCloud account, no network), iCloud is tried again after this long.
     private static let cloudRetryDelay: TimeInterval = 30
-    private static let log = Logger(subsystem: "com.aspyn.AgentOfficeMac", category: "approvals")
+    private static let log = Logger(subsystem: "com.aspyn.AgentOffice", category: "approvals")
     private static let categoryID = "approval"
     private static let allowActionID = "allow"
     private static let denyActionID = "deny"

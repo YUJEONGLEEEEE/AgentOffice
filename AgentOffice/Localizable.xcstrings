@@ -82,12 +82,12 @@
         }
       }
     },
-    "Commands are end-to-end encrypted and kept only in your own iCloud. Sign in with the same Apple Account as the AgentOffice Mac app." : {
+    "Commands are end-to-end encrypted and kept only in your own iCloud. Get AgentOffice for Mac from the App Store, and sign in with the same Apple Account on both." : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "명령어는 종단간 암호화되어 내 iCloud에만 저장돼요. AgentOffice Mac 앱과 같은 Apple 계정으로 로그인하세요."
+            "value" : "명령어는 종단간 암호화되어 내 iCloud에만 저장돼요. App Store에서 Mac용 AgentOffice를 받고, 두 기기에서 같은 Apple 계정으로 로그인하세요."
           }
         }
       }
@@ -232,12 +232,12 @@
         }
       }
     },
-    "No one is in the office yet.\nOpen AgentOffice on your Mac." : {
+    "No one is in the office yet.\nGet AgentOffice for Mac from the App Store and open it." : {
       "localizations" : {
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "아직 직원 정보가 없어요.\nMac에서 AgentOffice를 켜 주세요."
+            "value" : "아직 직원 정보가 없어요.\nApp Store에서 Mac용 AgentOffice를 받아 켜 주세요."
           }
         }
       }
